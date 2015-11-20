@@ -22,10 +22,17 @@ public class SeepMetrics extends MetricRegistry {
 	public static void configureMetrics(Config config){
 		// TODO: configure this component
 	}
-	
-	public static void startJMXReporter() {
-		jmxReporter = JmxReporter.forRegistry(REG).build();
-		jmxReporter.start();
+	/*
+	 * Method now synchronised to avoid creating multiple JMX reporters 
+	 * when deployment type is multi-thread
+	 */
+	public static synchronized void startJMXReporter() {
+		
+		//Avoid Redifinig jmxReporter in Multi-Thread deployment
+		if(jmxReporter == null){
+			jmxReporter = JmxReporter.forRegistry(REG).build();
+			jmxReporter.start();
+		}
 	}
 	
 	public static void startConsoleReporter(int period) {

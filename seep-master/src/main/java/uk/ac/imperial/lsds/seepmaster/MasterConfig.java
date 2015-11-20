@@ -21,7 +21,7 @@ public class MasterConfig extends Config {
 	
 	public static final String DEPLOYMENT_TARGET_TYPE = "deployment_target.type";
     private static final String DEPLOYMENT_TARGET_TYPE_DOC = "The target cluster to which the master will submit queries."
-    													+ "Physical cluster(0), yarn container(1), lxc, docker, etc";
+    		   													+ "Physical cluster(0), yarn container(1), local multi-thread(2), lxc, docker, etc";
     public static final String LISTENING_PORT = "master.port";
     private static final String LISTENING_PORT_DOC = "The port in which master will receive commands from workers";
     

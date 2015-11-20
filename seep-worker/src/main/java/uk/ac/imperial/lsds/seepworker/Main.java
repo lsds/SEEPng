@@ -44,7 +44,7 @@ public class Main {
 	
 	final private static Logger LOG = LoggerFactory.getLogger(Main.class);
 	
-	private void executeWorker(WorkerConfig wc){
+	public void executeWorker(WorkerConfig wc){
 		int masterPort = wc.getInt(WorkerConfig.MASTER_PORT);
 		InetAddress masterIp = null;
 		try {
