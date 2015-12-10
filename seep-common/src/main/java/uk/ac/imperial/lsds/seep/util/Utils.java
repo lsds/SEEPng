@@ -189,12 +189,15 @@ public class Utils {
         }
         return count;
     }
-	
+	private static SeepLogicalQuery lsq = null;
 	public static SeepLogicalQuery executeComposeFromQuery(String pathToJar, String definitionClass, String[] queryArgs, String methodName) {
 		Class<?> baseI = null;
 		Object baseInstance = null;
 		Method compose = null;
-		SeepLogicalQuery lsq = null;
+		//Avoid re-composing from query in multithread version!
+		if(lsq !=null)
+			return lsq;
+		
 		File urlPathToQueryDefinition = new File(pathToJar);
 		LOG.debug("-> Set path to query definition: {}", urlPathToQueryDefinition.getAbsolutePath());
 		URL[] urls = new URL[1];
