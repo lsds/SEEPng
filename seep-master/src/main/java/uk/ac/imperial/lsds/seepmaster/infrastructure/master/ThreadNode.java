@@ -1,0 +1,51 @@
+package uk.ac.imperial.lsds.seepmaster.infrastructure.master;
+
+import java.net.InetAddress;
+
+import uk.ac.imperial.lsds.seep.infrastructure.EndPoint;
+import uk.ac.imperial.lsds.seep.infrastructure.ExecutionUnitType;
+import uk.ac.imperial.lsds.seep.util.Utils;
+
+public class ThreadNode implements ExecutionUnit {
+
+	private static final ExecutionUnitType executionUnitType = ExecutionUnitType.MULTITHREAD;
+	
+	private EndPoint ep;
+	private int id;
+	
+	public ThreadNode(InetAddress ip, int port, int dataPort, int controlPort) {
+		this.id = Utils.computeIdFromIpAndPort(ip, port);
+		this.ep = new EndPoint(id, ip, port, dataPort, controlPort);
+	}
+
+	@Override
+	public EndPoint getEndPoint() {
+		return ep;
+	}
+
+	@Override
+	public int getId() {
+		return id;
+	}
+
+	@Override
+	public ExecutionUnitType getType() {
+		return executionUnitType;
+	}
+	
+	@Override
+	public String toString(){
+		String ls = System.getProperty("line.separator");
+		StringBuilder sb = new StringBuilder();
+		sb.append("TYPE: "+executionUnitType.name());
+		sb.append(ls);
+		sb.append("IP: "+ep.getIp().toString());
+		sb.append(ls);
+		sb.append("PORT: "+ep.getPort());
+		sb.append(ls);
+		sb.append("CTRL_PORT: "+ep.getControlPort());
+		sb.append(ls);
+		return sb.toString();
+	}
+
+}
