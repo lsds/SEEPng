@@ -14,6 +14,7 @@ import uk.ac.imperial.lsds.seep.util.Utils;
 import uk.ac.imperial.lsds.seepmaster.LifecycleManager;
 import uk.ac.imperial.lsds.seepmaster.MasterConfig;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.InfrastructureManager;
+import uk.ac.imperial.lsds.seepmaster.infrastructure.master.ThreadNodeManager;
 
 public class GenericQueryManager implements QueryManager {
 
@@ -50,6 +51,7 @@ public class GenericQueryManager implements QueryManager {
 	@Override
 	public boolean loadQueryFromParameter(SeepLogicalQuery slq, String pathToQueryJar, 
 			String definitionClassName, String[] queryArgs, String composeMethodName) {
+		
 		// Check whether the action is valid, but GenericQueryManager does not change Lifecycle
 		boolean allowed = lifeManager.canTransitTo(LifecycleManager.AppStatus.QUERY_SUBMITTED);
 		if(!allowed){
@@ -57,6 +59,20 @@ public class GenericQueryManager implements QueryManager {
 			return false;
 		}
 		LOG.debug("Logical query loaded: {}", slq.toString());
+		/**
+		 * If in MultiThread Mode - create the needed operator threads
+		 */
+		if (inf instanceof ThreadNodeManager) {
+			LOG.info("Local MultiThread Mode: Query needs [" + slq.getAllOperators().size()
+					+ "] Operators!");
+			inf.claimExecutionUnits(slq.getAllOperators().size());
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		// This is the only operation fully handled by QueryManager
 		// After checking queryExecutionMode it creates an appropriate queryManager and
 		// delegates all operations to that one
