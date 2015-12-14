@@ -35,7 +35,8 @@ public class ThreadNodeManager implements InfrastructureManager {
 	private Map<Integer, Connection> connectionstoThreadNodes;
 	private int currDataPort = 4600;
 	private int currWorkerPort = 3600;
-
+	private int currControlPort = 7777;
+	
 	public ThreadNodeManager(){
 		this.availableThreadNodes = new ArrayDeque<>();
 		this.usedThreadNodes = new ArrayDeque<>();
@@ -111,8 +112,9 @@ public class ThreadNodeManager implements InfrastructureManager {
 			HashMap<String,Object> map = new HashMap<>();
 			map.put("master.ip", "127.0.0.1");
 			map.put("master.port", "3500");
-			map.put("data.port", this.currDataPort);
-			map.put("worker.port", this.currWorkerPort);
+			map.put("data.port", currDataPort);
+			map.put("worker.port", currWorkerPort);
+			map.put("control.port", currControlPort);
 
 			
 			// Get default properties defined in the WorkerConfig file
@@ -137,6 +139,7 @@ public class ThreadNodeManager implements InfrastructureManager {
 			
 			this.currDataPort+=100;
 			this.currWorkerPort+=100;
+			this.currControlPort+=100;
 		}
 	}
 
