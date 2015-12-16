@@ -133,7 +133,7 @@ public class ThreadNodeManager implements InfrastructureManager {
 			WorkerConfig wc = new WorkerConfig(validatedProperties);
 			
 			Thread threadWorker = new Thread(new WorkerThread(wc));
-			threadWorker.setName("ThreadNode-"+i);
+			threadWorker.setName("Worker-ThreadNode-"+i);
 			this.executorPool.execute(threadWorker);
 			//this.addExecutionUnit( buildExecutionUnit(InetAddress.getLoopbackAddress(), currWorkerPort,  currDataPort));
 			
