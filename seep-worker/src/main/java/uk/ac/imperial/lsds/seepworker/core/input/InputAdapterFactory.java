@@ -15,6 +15,7 @@ import uk.ac.imperial.lsds.seep.api.data.Schema;
 import uk.ac.imperial.lsds.seep.comm.IOComm;
 import uk.ac.imperial.lsds.seep.core.IBuffer;
 import uk.ac.imperial.lsds.seep.core.InputAdapter;
+import uk.ac.imperial.lsds.seepcontrib.hdfs.comm.HDFSDataStream;
 import uk.ac.imperial.lsds.seepcontrib.kafka.comm.KafkaDataStream;
 import uk.ac.imperial.lsds.seepworker.WorkerConfig;
 import uk.ac.imperial.lsds.seepworker.core.Dataset;
@@ -22,14 +23,14 @@ import uk.ac.imperial.lsds.seepworker.core.Dataset;
 public class InputAdapterFactory {
 
 	// FIXME: refactor -> all inputadapters that are per buffer do the same. code reuse
-	
+
 	final static private Logger LOG = LoggerFactory.getLogger(IOComm.class.getName());
-	
+
 	public static List<InputAdapter> buildInputAdapterForStreamId(WorkerConfig wc, int streamId, List<IBuffer> buffers, Set<DataReference> drefs, ConnectionType connType) {
 		List<InputAdapter> ias = null;
 		DataReference dRef_reference = drefs.iterator().next();
 		DataStoreType type = dRef_reference.getDataStore().type();
-		
+
 		// The case of locally serving a DataReference.
 		// Note that although SEEP_SYNTHETIC_GEN is declared as external, it's just faked.
 		if((dRef_reference.isManaged() && dRef_reference.getServeMode().equals(ServeMode.STORE)) || type.equals(DataStoreType.SEEP_SYNTHETIC_GEN)) {
@@ -52,10 +53,13 @@ public class InputAdapterFactory {
 			else if(type.equals(DataStoreType.KAFKA)) {
 				ias = buildInputAdapterOfTypeKafkaForOps(wc, streamId, drefs, buffers, connType);
 			}
+			else if(type.equals(DataStoreType.HDFS)) {
+				ias = buildInputAdapterOfTypeHDFSForOps(wc, streamId, drefs, buffers, connType);
+			}
 		}
 		return ias;
 	}
-	
+
 	private static List<InputAdapter> buildInputAdapterOfTypeDatasetForOps(
 			WorkerConfig wc, int streamId, Set<DataReference> drefs, List<Dataset> datasets){
 		List<InputAdapter> ias = new ArrayList<>();
@@ -94,7 +98,7 @@ public class InputAdapterFactory {
 		}
 		return ias;
 	}
-	
+
 	private static List<InputAdapter> buildInputAdapterOfTypeFileForOps(
 			WorkerConfig wc, int streamId, Set<DataReference> drefs, List<IBuffer> buffers, ConnectionType connType) {
 		List<InputAdapter> ias = new ArrayList<>();
@@ -110,7 +114,7 @@ public class InputAdapterFactory {
 		}
 		return ias;
 	}
-	
+
 	private static List<InputAdapter> buildInputAdapterOfTypeKafkaForOps(
 			WorkerConfig wc, int streamId, Set<DataReference> drefs, List<IBuffer> buffers, ConnectionType connType) {
 		List<InputAdapter> ias = new ArrayList<>();
@@ -121,6 +125,22 @@ public class InputAdapterFactory {
 			LOG.info("Creating KAFKA inputAdapter for upstream streamId: {} of type {}", streamId, "ONE_AT_A_TIME");
 			for(IBuffer buffer : buffers) {
 				InputAdapter ia = new KafkaDataStream(streamId, buffer, expectedSchema);
+				ias.add(ia);
+			}
+		}
+		return ias;
+	}
+
+	private static List<InputAdapter> buildInputAdapterOfTypeHDFSForOps(
+			WorkerConfig wc, int streamId, Set<DataReference> drefs, List<IBuffer> buffers, ConnectionType connType) {
+		List<InputAdapter> ias = new ArrayList<>();
+		short cType = connType.ofType();
+		Schema expectedSchema = drefs.iterator().next().getDataStore().getSchema();
+		if(cType == ConnectionType.ONE_AT_A_TIME.ofType()) {
+			// one-queue-per-conn, one-single-queue, etc.
+			LOG.info("Creating HDFS inputAdapter for upstream streamId: {} of type {}", streamId, "ONE_AT_A_TIME");
+			for(IBuffer buffer : buffers) {
+				InputAdapter ia = new HDFSDataStream(streamId, buffer, expectedSchema);
 				ias.add(ia);
 			}
 		}

@@ -18,6 +18,9 @@ import uk.ac.imperial.lsds.seep.api.operator.UpstreamConnection;
 import uk.ac.imperial.lsds.seep.core.DataStoreSelector;
 import uk.ac.imperial.lsds.seep.core.EventBasedOBuffer;
 import uk.ac.imperial.lsds.seep.core.OBuffer;
+import uk.ac.imperial.lsds.seep.errors.NotImplementedException;
+import uk.ac.imperial.lsds.seepcontrib.hdfs.comm.HDFSSelector;
+import uk.ac.imperial.lsds.seepcontrib.hdfs.config.HDFSConfig;
 import uk.ac.imperial.lsds.seepcontrib.kafka.comm.KafkaSelector;
 import uk.ac.imperial.lsds.seepcontrib.kafka.config.KafkaConfig;
 import uk.ac.imperial.lsds.seepworker.WorkerConfig;
@@ -28,35 +31,41 @@ import uk.ac.imperial.lsds.seepworker.core.output.CoreOutput;
 public class DataStoreSelectorFactory {
 
 	final private static Logger LOG = LoggerFactory.getLogger(DataStoreSelectorFactory.class.getName());
-	
-	public static List<DataStoreSelector> buildDataStoreSelector(CoreInput coreInput, CoreOutput coreOutput, 
+
+	public static List<DataStoreSelector> buildDataStoreSelector(CoreInput coreInput, CoreOutput coreOutput,
 			WorkerConfig wc, LogicalOperator o, InetAddress myIp, int dataPort) {
 		List<DataStoreSelector> selectors = new ArrayList<>();
-		
+
 		if(coreInput.requiresConfigureSelectorOfType(DataStoreType.NETWORK) ||
 		   coreOutput.requiresConfigureSelectorOfType(DataStoreType.NETWORK)){
-			DataStoreSelector sel = DataStoreSelectorFactory.maybeConfigureNetworkSelector(coreInput, coreOutput, 
+			DataStoreSelector sel = DataStoreSelectorFactory.maybeConfigureNetworkSelector(coreInput, coreOutput,
 					wc, o, myIp, dataPort);
 			selectors.add(sel);
 		}
-		
+
 		if(coreInput.requiresConfigureSelectorOfType(DataStoreType.FILE) ||
 		   coreOutput.requiresConfigureSelectorOfType(DataStoreType.FILE)) {
-			DataStoreSelector sel = DataStoreSelectorFactory.maybeConfigureFileSelector(coreInput, coreOutput, 
+			DataStoreSelector sel = DataStoreSelectorFactory.maybeConfigureFileSelector(coreInput, coreOutput,
 					wc, o, myIp, dataPort);
 			selectors.add(sel);
 		}
-		
+
 		if(coreInput.requiresConfigureSelectorOfType(DataStoreType.KAFKA)) {
-			DataStoreSelector sel = DataStoreSelectorFactory.maybeConfigureKafkaSelector(coreInput, coreOutput, 
+			DataStoreSelector sel = DataStoreSelectorFactory.maybeConfigureKafkaSelector(coreInput, coreOutput,
 					wc, o, myIp, dataPort);
 			selectors.add(sel);
 		}
-		
+
+		if(coreInput.requiresConfigureSelectorOfType(DataStoreType.HDFS)) {
+			DataStoreSelector sel = DataStoreSelectorFactory.maybeConfigureHDFSSelector(coreInput, coreOutput,
+					wc, o, myIp, dataPort);
+			selectors.add(sel);
+		}
+
 		return selectors;
 	}
-	
-	public static NetworkSelector maybeConfigureNetworkSelector(CoreInput coreInput, CoreOutput coreOutput, 
+
+	public static NetworkSelector maybeConfigureNetworkSelector(CoreInput coreInput, CoreOutput coreOutput,
 			WorkerConfig wc, LogicalOperator o, InetAddress myIp, int dataPort){
 		NetworkSelector ns = null;
 		if(coreInput.requiresConfigureSelectorOfType(DataStoreType.NETWORK)) {
@@ -81,16 +90,27 @@ public class DataStoreSelectorFactory {
 		}
 		return ns;
 	}
-	
-	public static FileSelector maybeConfigureFileSelector(CoreInput coreInput, CoreOutput coreOutput, 
-			WorkerConfig wc, LogicalOperator o, InetAddress myIp, int dataPort) {
+
+	private static Set<OBuffer> filterOBufferToStream(Map<Integer, OBuffer> buffers) {
+		// Select only those that are meant to be streamed
+		Set<OBuffer> filtered = new HashSet<>();
+		for(OBuffer oBuffer : buffers.values()) {
+			if(oBuffer.getDataReference().getServeMode().equals(ServeMode.STREAM)) {
+				filtered.add(oBuffer);
+			}
+		}
+		return filtered;
+	}
+
+	public static FileSelector maybeConfigureFileSelector(CoreInput coreInput, CoreOutput coreOutput,
+			WorkerConfig wc, LogicalOperator o, InetAddress myIp, int dataPort){
 		FileSelector fs = null;
 		if(coreInput.requiresConfigureSelectorOfType(DataStoreType.FILE)) {
 			fs = new FileSelector(wc);
 			// DataReferenceId - DataStore
 			Map<Integer, DataStore> fileOrigins = new HashMap<>();
 			Map<Integer, Set<DataReference>> i_dRefs = coreInput.getDataReferences();
-			
+
 			for(Set<DataReference> dRefs : i_dRefs.values()) {
 				for(DataReference dR : dRefs) {
 					DataStore dataStore = dR.getDataStore();
@@ -100,8 +120,8 @@ public class DataStoreSelectorFactory {
 					}
 				}
 			}
-			
-			
+
+
 //			for(DataReference dR : dRefs) {
 //				DataStore dataStore = dR.getDataStore();
 //				if(dataStore.type() == DataStoreType.FILE) {
@@ -109,15 +129,15 @@ public class DataStoreSelectorFactory {
 //					fileOrigins.put(dRefId, dataStore);
 //				}
 //			}
-			
+
 //			for(UpstreamConnection uc : o.upstreamConnections()) {
 //				if(uc.getDataStoreType() == DataStoreType.FILE) {
 //					int sId = uc.getStreamId();
 //					fileOrigins.put(sId, uc.getDataStore());
 //				}
 //			}
-			
-			
+
+
 			fs.configureAccept(fileOrigins, coreInput.getIBufferProvider());
 		}
 		// Output of type File is taken care of
@@ -139,7 +159,7 @@ public class DataStoreSelectorFactory {
 		return fs;
 	}
 
-	public static KafkaSelector maybeConfigureKafkaSelector(CoreInput coreInput, CoreOutput coreOutput, 
+	public static KafkaSelector maybeConfigureKafkaSelector(CoreInput coreInput, CoreOutput coreOutput,
 			WorkerConfig wc, LogicalOperator o, InetAddress myIp, int dataPort){
 		KafkaSelector ks = null;
 		if(coreInput.requiresConfigureSelectorOfType(DataStoreType.KAFKA)){
@@ -150,5 +170,17 @@ public class DataStoreSelectorFactory {
 		}
 		return ks;
 	}
-	
+
+	public static HDFSSelector maybeConfigureHDFSSelector(CoreInput coreInput, CoreOutput coreOutput,
+		  	WorkerConfig wc, LogicalOperator o, InetAddress myIp, int dataPort) {
+		HDFSSelector hdfsSelector = null;
+		if(coreInput.requiresConfigureSelectorOfType(DataStoreType.HDFS)) {
+			HDFSConfig hdfsConfig = new HDFSConfig(o.upstreamConnections().get(0).getDataStore().getConfig());
+			LOG.info("Configuring HDFSSelector for input");
+			hdfsSelector = new HDFSSelector(hdfsConfig.getString(HDFSConfig.HDFS_DEFAULT_FS),
+                    coreInput.getIBufferProvider());
+		}
+		return hdfsSelector;
+	}
+
 }
