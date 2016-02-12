@@ -58,3 +58,6 @@ deploy/
 dist/
 install/
 standaloneDist/
+
+*.iml
+.idea/
