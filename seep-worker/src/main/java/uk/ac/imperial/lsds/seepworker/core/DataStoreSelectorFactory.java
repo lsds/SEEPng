@@ -91,17 +91,6 @@ public class DataStoreSelectorFactory {
 		return ns;
 	}
 
-	private static Set<OBuffer> filterOBufferToStream(Map<Integer, OBuffer> buffers) {
-		// Select only those that are meant to be streamed
-		Set<OBuffer> filtered = new HashSet<>();
-		for(OBuffer oBuffer : buffers.values()) {
-			if(oBuffer.getDataReference().getServeMode().equals(ServeMode.STREAM)) {
-				filtered.add(oBuffer);
-			}
-		}
-		return filtered;
-	}
-
 	public static FileSelector maybeConfigureFileSelector(CoreInput coreInput, CoreOutput coreOutput,
 			WorkerConfig wc, LogicalOperator o, InetAddress myIp, int dataPort){
 		FileSelector fs = null;
