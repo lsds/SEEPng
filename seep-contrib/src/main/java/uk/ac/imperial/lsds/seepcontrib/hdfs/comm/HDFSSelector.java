@@ -104,10 +104,10 @@ public class HDFSSelector implements DataStoreSelector {
 
     private class HDFSReader implements Runnable {
 
-        private static final int BUFFER_SIZE = 4096;
         final private Logger LOG = LoggerFactory.getLogger(HDFSReader.class);
         private final List<FileStatus> statuses;
         private final IBuffer ib;
+        private final String workerName = Thread.currentThread().getName();
 
         private HDFSReader(List<FileStatus> statuses, IBuffer ib) {
             this.statuses = statuses;
@@ -120,11 +120,13 @@ public class HDFSSelector implements DataStoreSelector {
          */
         @Override
         public void run() {
+            LOG.info("{} reading {} statuses", this.workerName, statuses.size());
             for (FileStatus f : statuses) {
                 try {
                     FSDataInputStream inputStream = fs.open(f.getPath());
                     ReadableByteChannel channel = Channels.newChannel(inputStream);
-                    ib.readFrom(channel);
+                    int tuplesRead  = ib.readFrom(channel);
+                    LOG.info("{} read {} tuples from {}", this.workerName, tuplesRead, f.toString());
                 } catch (IOException e) {
                     LOG.error("Error when attempting to open " + f.getPath(), e);
                 }
