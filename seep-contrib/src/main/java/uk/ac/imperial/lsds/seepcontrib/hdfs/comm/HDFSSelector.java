@@ -5,6 +5,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.imperial.lsds.seep.api.DataStoreType;
@@ -12,6 +13,8 @@ import uk.ac.imperial.lsds.seep.core.DataStoreSelector;
 import uk.ac.imperial.lsds.seep.core.IBuffer;
 
 import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -120,18 +123,8 @@ public class HDFSSelector implements DataStoreSelector {
             for (FileStatus f : statuses) {
                 try {
                     FSDataInputStream inputStream = fs.open(f.getPath());
-                    byte buf[] = new byte[BUFFER_SIZE];
-                    int bytesRead = inputStream.read(buf);
-                    while (bytesRead >= 0) {
-                        if (bytesRead == BUFFER_SIZE) {
-                            ib.pushData(buf);
-                        } else {
-                            // On the final iteration the buf array won't be full
-                            // and we shouldn't be pushing additional data.
-                            ib.pushData(Arrays.copyOfRange(buf, 0, bytesRead));
-                        }
-                        bytesRead = inputStream.read(buf);
-                    }
+                    ReadableByteChannel channel = Channels.newChannel(inputStream);
+                    ib.readFrom(channel);
                 } catch (IOException e) {
                     LOG.error("Error when attempting to open " + f.getPath(), e);
                 }
