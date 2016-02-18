@@ -14,6 +14,8 @@ dependencies {
   compile "org.apache.hadoop:hadoop-common:2.7.1"
   testCompile "org.apache.kafka:kafka_2.10:0.8.2-beta:test"
   testCompile "org.apache.hadoop:hadoop-hdfs:2.7.1:test"
+
+  testCompile project(':seep-worker')
 }
 
 task fatJar(type: Jar){
