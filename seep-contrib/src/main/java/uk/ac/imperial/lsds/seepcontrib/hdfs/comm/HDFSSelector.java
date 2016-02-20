@@ -4,7 +4,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RemoteIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.imperial.lsds.seep.api.DataStoreType;
@@ -31,12 +33,12 @@ public class HDFSSelector implements DataStoreSelector {
             Configuration conf = new Configuration() ;
             this.fs = FileSystem.get(path.toUri(), conf);
 
-            FileStatus[] status = fs.listStatus(path);
+            RemoteIterator<LocatedFileStatus> statuses = fs.listFiles(path, true);
 
             int workerCount = dataAdapters.size();
             workers = new Thread[workerCount];
 
-            Map<Integer, List<FileStatus>> workerStatuses = splitStatuses(status, workerCount);
+            Map<Integer, List<FileStatus>> workerStatuses = splitStatuses(statuses, workerCount);
 
             int threadNumber = 0;
             for (IBuffer ib : dataAdapters.values()) {
@@ -45,7 +47,6 @@ public class HDFSSelector implements DataStoreSelector {
                 workers[threadNumber] = worker;
                 threadNumber++;
             }
-
         } catch (IOException ioe) {
             LOG.error("HDFS failed to fetch configuration");
             ioe.printStackTrace();
@@ -54,21 +55,23 @@ public class HDFSSelector implements DataStoreSelector {
 
     /**
      * Divides the list of FileStatus between workerCount worker threads.
-     * @param status The array of FileStatus to divide.
+     * @param statuses The iterator of FileStatus to divide.
      * @param workerCount The number of workers to divide between.
      * @return A List of length workerCount containing a subset of the FileStatus'.
      */
-    private Map<Integer, List<FileStatus>> splitStatuses(FileStatus[] status, int workerCount) {
+    private Map<Integer, List<FileStatus>> splitStatuses(RemoteIterator<LocatedFileStatus> statuses, int workerCount) throws IOException {
         Map<Integer, List<FileStatus>> result = new HashMap<>();
 
-        for (int i = 0; i < status.length; i++) {
+        int i = 0;
+        while (statuses.hasNext()) {
             int index = i % workerCount;
+            LocatedFileStatus status = statuses.next();
 
             if (result.containsKey(index)) {
-                result.get(index).add(status[i]);
+                result.get(index).add(status);
             } else {
                 List<FileStatus> statusList = new ArrayList<>();
-                statusList.add(status[i]);
+                statusList.add(status);
                 result.put(index, statusList);
             }
         }
@@ -123,10 +126,10 @@ public class HDFSSelector implements DataStoreSelector {
                 try {
                     FSDataInputStream inputStream = fs.open(f.getPath());
                     ReadableByteChannel channel = Channels.newChannel(inputStream);
-                    int tuplesRead  = ib.readFrom(channel);
-                    LOG.info("{} read {} tuples from {}", this.workerName, tuplesRead, f.toString());
+                    int tuplesRead = ib.readFrom(channel);
+                    LOG.info("{} read {} tuples from {}", this.workerName, tuplesRead, f.getPath().toString());
                 } catch (IOException e) {
-                    LOG.error("Error when attempting to open " + f.getPath(), e);
+                    LOG.error("Error when attempting to open " + f.getPath().toString(), e);
                 }
             }
         }

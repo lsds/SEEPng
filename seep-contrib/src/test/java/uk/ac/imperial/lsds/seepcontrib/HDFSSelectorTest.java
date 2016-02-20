@@ -6,14 +6,11 @@ import uk.ac.imperial.lsds.seep.api.data.Schema;
 import uk.ac.imperial.lsds.seep.api.data.Type;
 import uk.ac.imperial.lsds.seep.core.IBuffer;
 import uk.ac.imperial.lsds.seep.tools.GenerateBinaryFile;
-import uk.ac.imperial.lsds.seep.util.Utils;
 import uk.ac.imperial.lsds.seepcontrib.hdfs.comm.HDFSDataStream;
 import uk.ac.imperial.lsds.seepcontrib.hdfs.comm.HDFSSelector;
 import uk.ac.imperial.lsds.seepworker.WorkerConfig;
 import uk.ac.imperial.lsds.seepworker.core.input.InputBuffer;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -24,20 +21,12 @@ public class HDFSSelectorTest {
 
     @Test
     public void test() {
-        String path = "/tmp/test.data";
-        String absPath = Utils.absolutePath(path);
-        URI uri = null;
-        try {
-            uri = new URI(Utils.FILE_URI_SCHEME + absPath);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
-
         Schema s = Schema.SchemaBuilder.getInstance().newField(Type.INT, "param1").newField(Type.INT, "param2").build();
-        int targetSize = 1;
+        String path = "/tmp/test.data";
+        int targetSize = 1; //1MB file
 
-        GenerateBinaryFile.createFile(s, uri.toString(), targetSize);
+        // Take this generated file and upload it to your HDFS installation
+        GenerateBinaryFile.createFile(s, path, targetSize);
 
         Properties p = new Properties();
         p.setProperty(WorkerConfig.MASTER_IP, "");
@@ -51,7 +40,8 @@ public class HDFSSelectorTest {
         Map<Integer, IBuffer> dataAdapters = new HashMap<>();
         dataAdapters.put(0, ib);
 
-        HDFSSelector hdfs = new HDFSSelector(uri.toString(), dataAdapters);
+        String hdfsTestFilePath = "hdfs://..."; // Set this path to the uploaded, generated file.
+        HDFSSelector hdfs = new HDFSSelector(hdfsTestFilePath, dataAdapters);
         HDFSDataStream hdfsStream = new HDFSDataStream(12, ib, s);
 
         hdfs.startSelector();
