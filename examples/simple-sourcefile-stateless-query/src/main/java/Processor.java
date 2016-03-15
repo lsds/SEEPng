@@ -11,17 +11,21 @@ import uk.ac.imperial.lsds.seep.api.data.Schema.SchemaBuilder;
 
 public class Processor implements SeepTask {
 
-	private Schema schema = SchemaBuilder.getInstance().newField(Type.INT, "param1").newField(Type.INT, "param2").build();
+	//private Schema schema = SchemaBuilder.getInstance().newField(Type.INT, "param1").newField(Type.INT, "param2").build();
+	private Schema schema = SchemaBuilder.getInstance().newField(Type.STRING, "record").build();
 
 	@Override
 	public void processData(ITuple data, API api) {
-		int param1 = data.getInt("param1");
-		int param2 = data.getInt("param2");
+		//int param1 = data.getInt("param1");
+		//int param2 = data.getInt("param2");
+		String record = data.getString("record");
 		
-		param1 = param1 * 3;
-		param2 = param2 * 3;
-		byte[] d = OTuple.create(schema, new String[]{"param1", "param2"}, new Object[]{param1, param2});
-		System.out.println("data send: "+d.length);
+		//param1 = param1 * 3;
+		//param2 = param2 * 3;
+		record = record.toUpperCase();
+		//byte[] d = OTuple.create(schema, new String[]{"param1", "param2"}, new Object[]{param1, param2});
+		byte[] d = OTuple.create(schema, new String[]{"record"}, new Object[]{record});
+		System.out.println("data send ("+d.length+"): " + record);
 		api.send(d);
 		
 //		waitHere(10);

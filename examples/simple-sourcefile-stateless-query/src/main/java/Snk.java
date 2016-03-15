@@ -13,10 +13,12 @@ public class Snk implements Sink {
 		
 		System.out.println("data size: "+data.getData().length);
 		
-		int param1 = data.getInt("param1");
-		int param2 = data.getInt("param2");
+		//int param1 = data.getInt("param1");
+		//int param2 = data.getInt("param2");
+		String record = data.getString("record");
 		
-		System.out.println("P1: "+param1+" P2: "+param2);
+		//System.out.println("P1: "+param1+" P2: "+param2);
+		System.out.println(": "+record);
 	}
 
 	@Override
