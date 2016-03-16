@@ -34,7 +34,7 @@ public class Base implements QueryComposer {
 		fileSource.connectTo(processor, schema, 0);
 		Properties pSnk = new Properties();
         pSnk.setProperty(FileConfig.FILE_PATH, "/home/wculhane/output.txt");
-		pSrc.setProperty(FileConfig.TEXT_SOURCE, Boolean.TRUE.toString());
+		pSnk.setProperty(FileConfig.TEXT_SOURCE, Boolean.TRUE.toString());
 		processor.connectTo(sink, 0, new DataStore(schema, DataStoreType.FILE, pSnk));
 		
 		return queryAPI.build();
