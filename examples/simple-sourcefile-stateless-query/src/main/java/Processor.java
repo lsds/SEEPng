@@ -25,7 +25,7 @@ public class Processor implements SeepTask {
 		record = record.toUpperCase();
 		//byte[] d = OTuple.create(schema, new String[]{"param1", "param2"}, new Object[]{param1, param2});
 		byte[] d = OTuple.create(schema, new String[]{"record"}, new Object[]{record});
-		System.out.println("data send ("+d.length+"): " + record);
+		System.out.println("[Processor] data send ("+d.length+"): " + record);
 		api.send(d);
 		
 //		waitHere(10);
@@ -48,7 +48,7 @@ public class Processor implements SeepTask {
 	
 	@Override
 	public void setUp() {
-		// TODO Auto-generated method stub
+		System.out.println("I am a Processor!!");
 	}
 
 	@Override

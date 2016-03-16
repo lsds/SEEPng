@@ -11,14 +11,14 @@ public class Snk implements Sink {
 	@Override
 	public void processData(ITuple data, API api) {
 		
-		System.out.println("data size: "+data.getData().length);
+		System.out.println("[Sink] Received data size: "+data.getData().length);
 		
 		//int param1 = data.getInt("param1");
 		//int param2 = data.getInt("param2");
 		String record = data.getString("record");
 		
 		//System.out.println("P1: "+param1+" P2: "+param2);
-		System.out.println(": "+record);
+		System.out.println("[Sink] : "+record);
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class Snk implements Sink {
 	
 	@Override
 	public void setUp() {
-		// TODO Auto-generated method stub
+		System.out.println("I am a Sink!!");
 	}
 
 	@Override

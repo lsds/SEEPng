@@ -23,18 +23,19 @@ public class Base implements QueryComposer {
 		Schema schema = SchemaBuilder.getInstance().newField(Type.STRING, "record").build();
 		
 		Properties pSrc = new Properties();
-		pSrc.setProperty(FileConfig.FILE_PATH, "/home/wculhane/test.txt");
+		pSrc.setProperty(FileConfig.FILE_PATH, "/home/pg1712/jmeter.log");
 		pSrc.setProperty(FileConfig.TEXT_SOURCE, Boolean.TRUE.toString());
 		pSrc.setProperty(FileConfig.SERDE_TYPE, new Integer(SerializerType.NONE.ofType()).toString());
 		
 		FileSource fileSource = FileSource.newSource(0, pSrc);
 		LogicalOperator processor = queryAPI.newStatelessOperator(new Processor(), 1);
+//		LogicalOperator sink = queryAPI.newStatelessSink(new Snk(), 2);
         MarkerSink sink = MarkerSink.newSink(2);
 		
 		fileSource.connectTo(processor, schema, 0);
 		Properties pSnk = new Properties();
-        pSnk.setProperty(FileConfig.FILE_PATH, "/home/wculhane/output.txt");
-		pSrc.setProperty(FileConfig.TEXT_SOURCE, Boolean.TRUE.toString());
+        pSnk.setProperty(FileConfig.FILE_PATH, "/home/pg1712/output.txt");
+        pSnk.setProperty(FileConfig.TEXT_SOURCE, Boolean.TRUE.toString());
 		processor.connectTo(sink, 0, new DataStore(schema, DataStoreType.FILE, pSnk));
 		
 		return queryAPI.build();
