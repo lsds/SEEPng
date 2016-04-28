@@ -8,8 +8,7 @@ import uk.ac.imperial.lsds.seep.api.data.Schema;
 import uk.ac.imperial.lsds.seep.api.data.Schema.SchemaBuilder;
 import uk.ac.imperial.lsds.seep.api.data.Type;
 
-
-
+import uk.ac.imperial.lsds.seep.api.data.CSVParser;
 
 public class Branch1 implements SeepTask {
 
@@ -17,6 +16,9 @@ public class Branch1 implements SeepTask {
 	
 	@Override
 	public void processData(ITuple data, API api) {
+		CSVParser inputParse = CSVParser.getInstance();
+		inputParse.setSchema(schema);
+		schema.SchemaParser(inputParse);
 		int userId = data.getInt("userId");
 		long value = data.getLong("value");
 		
