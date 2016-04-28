@@ -226,27 +226,27 @@ public class Dataset implements IBuffer, OBuffer {
 				}
 				rPtrToBuffer.flip();
 				
-//				if (!readerIterator.hasNext()) {
-//					
-//					//We caught up to the write buffer. Allocate a new buffer for writing
-//					//this.wPtrToBuffer = bufferPool._forceBorrowBuffer();
-//					this.wPtrToBuffer = this.obtainNewWPtrBuffer();
-//					//this.buffers.add(wPtrToBuffer);
-//					this.addBufferToBuffers(wPtrToBuffer);
-//					
-//					
-//					if(! buffers.isEmpty()) {
-//						//Yes, the following looks a bit silly (just getting a new iterator to the position
-//						//of the current one), but it is necessary to allow readerIterator.remove to work 
-//						//without the iterator complaining about concurrent modification due to adding a new
-//						//write buffer to the list.
-//						readerIterator = this.buffers.iterator();
-//						rPtrToBuffer = readerIterator.next();
-//						if (rPtrToBuffer.remaining() == 0) {
-//							return null;
-//						}
-//					}
-//				}
+				if (!readerIterator.hasNext()) {
+					
+					//We caught up to the write buffer. Allocate a new buffer for writing
+					//this.wPtrToBuffer = bufferPool._forceBorrowBuffer();
+					this.wPtrToBuffer = this.obtainNewWPtrBuffer();
+					//this.buffers.add(wPtrToBuffer);
+					this.addBufferToBuffers(wPtrToBuffer);
+					
+					
+					if(! buffers.isEmpty()) {
+						//Yes, the following looks a bit silly (just getting a new iterator to the position
+						//of the current one), but it is necessary to allow readerIterator.remove to work 
+						//without the iterator complaining about concurrent modification due to adding a new
+						//write buffer to the list.
+						readerIterator = this.buffers.iterator();
+						rPtrToBuffer = readerIterator.next();
+						if (rPtrToBuffer.remaining() == 0) {
+							return null;
+						}
+					}
+				}
 				
 			}
 			else {
