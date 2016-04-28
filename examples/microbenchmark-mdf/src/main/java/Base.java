@@ -10,9 +10,12 @@ import uk.ac.imperial.lsds.seep.api.data.Schema.SchemaBuilder;
 import uk.ac.imperial.lsds.seep.api.data.Type;
 import uk.ac.imperial.lsds.seep.api.operator.LogicalOperator;
 import uk.ac.imperial.lsds.seep.api.operator.SeepLogicalQuery;
+import uk.ac.imperial.lsds.seep.api.operator.sources.FileConfig;
+import uk.ac.imperial.lsds.seep.api.operator.sources.FileSource;
 import uk.ac.imperial.lsds.seep.api.operator.sources.SyntheticSource;
 import uk.ac.imperial.lsds.seep.api.operator.sources.SyntheticSourceConfig;
-
+import uk.ac.imperial.lsds.seep.comm.serialization.SerializerType;
+import uk.ac.imperial.lsds.seep.api.data.CSVParser;
 
 
 public class Base implements QueryComposer {
@@ -55,14 +58,24 @@ public class Base implements QueryComposer {
 	@Override
 	public SeepLogicalQuery compose() {
 		
-		Properties syncConfig = new Properties();
-		String size = ""+isize+"";
-		syncConfig.setProperty(SyntheticSourceConfig.GENERATED_SIZE, size);
+		//Properties syncConfig = new Properties();
+		//String size = ""+isize+"";
+		//syncConfig.setProperty(SyntheticSourceConfig.GENERATED_SIZE, size);
 		
 		// source with adder (fixed selectivity)
-		SyntheticSource synSrc = SyntheticSource.newSource(operatorId++, syncConfig);
+		Properties pSrc = new Properties();
+		pSrc.setProperty(FileConfig.FILE_PATH, "/home/wculhane/test.txt");
+		pSrc.setProperty(FileConfig.SERDE_TYPE, new Integer(SerializerType.NONE.ofType()).toString());
+		pSrc.setProperty(FileConfig.TEXT_SOURCE, (new Boolean(true)).toString());
+		CSVParser inputParse = CSVParser.getInstance();
+		inputParse.setSchema(schema);
+		schema.SchemaParser(inputParse);
+		FileSource fileSource = FileSource.newSource(operatorId++, pSrc);
+		//SyntheticSource synSrc = SyntheticSource.newSource(operatorId++, syncConfig);
+		
 		LogicalOperator adderOne = queryAPI.newStatelessOperator(new Adder(1.0), operatorId++);
-		synSrc.connectTo(adderOne, schema, connectionId++);
+		fileSource.connectTo(adderOne, schema, connectionId++);
+		//synSrc.connectTo(adderOne, schema, connectionId++);
 		
 		// We create a choose
 		LogicalOperator choose = queryAPI.newChooseOperator(new Choose(incremental_choose), operatorId++);

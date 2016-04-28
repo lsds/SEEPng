@@ -8,6 +8,7 @@ import uk.ac.imperial.lsds.seep.api.operator.sinks.Sink;
 
 
 public class Snk implements Sink {
+	private boolean started = false;
 
 	@Override
 	public void setUp() {
@@ -20,7 +21,10 @@ public class Snk implements Sink {
 		
 		long value = data.getLong("value");
 		
-		System.out.println("streamID: "+streamId+" value: "+value);
+		if(!started) {
+			System.out.println("streamID: "+streamId+" value: "+value);
+			started = true;
+		}
 	}
 
 	@Override
