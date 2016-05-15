@@ -1,5 +1,14 @@
 package uk.ac.imperial.lsds.seepmaster.ui.web;
-
+/*******************************************************************************
+ * Copyright (c) 2016 Imperial College London
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Panagiotis Garefalakis (pg1712@imperial.ac.uk)
+ ******************************************************************************/
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -22,9 +31,9 @@ import org.slf4j.LoggerFactory;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.InfrastructureManager;
 import uk.ac.imperial.lsds.seepmaster.query.GenericQueryManager;
 
-public class WebUIHandler extends HttpServlet {
+public class WebUIMainServlet extends HttpServlet {
 
-	final private static Logger LOG = LoggerFactory.getLogger(WebUIHandler.class);
+	final private static Logger LOG = LoggerFactory.getLogger(WebUIMainServlet.class);
 	private static final long serialVersionUID = 1L;
 	
 	private final int MAX_MEMORY_SIZE_TO_HOLD_FILE = 1024 * 1024 * 100; // 100 MB
@@ -38,7 +47,7 @@ public class WebUIHandler extends HttpServlet {
 	private String[] queryArgs;
 	private String composeMethod;
 
-	public WebUIHandler(GenericQueryManager qm, InfrastructureManager inf){
+	public WebUIMainServlet(GenericQueryManager qm, InfrastructureManager inf){
 		this.qm = qm;
 		this.inf = inf;
 	}

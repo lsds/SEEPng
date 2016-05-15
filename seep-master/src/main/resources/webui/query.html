@@ -1,8 +1,9 @@
+<!doctype html>
 <html class="no-js" lang="en">
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>SEEPng Web Administration Interface</title>
+	<title></title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -36,8 +37,8 @@
 	<script src="js/monitoring_graph.js"></script>
 	<script src="js/main.js"></script>
 </head>
-
-<body>	
+<body >
+	
 		<!--[if lt IE 8]>
 			<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 			<![endif]-->
@@ -47,60 +48,35 @@
 						<a class="navbar-brand" href="#">SEEPng</a>
 					</div>
 					<ul class="nav navbar-nav">
-						<li class="active"><a href="index.html">Home</a></li>
-						<li><a href="query.html">Query</a></li>
+						<li><a href="index.html">Home</a></li>
+						<li class="active"><a href="query.html">Query</a></li>
 						<li><a href="#">Metrics</a></li> 
 						<li><a href="#">About</a></li> 
 					</ul>
 				</div>
 			</nav>
-
 			<div class="container-fluid" id="logos" style="width: 100%;">
 				<!-- <img src="img/bp.png" style="position:absolute; top: 20px; right: 270px; height: 50px;"> -->
 				<img src="img/ic.png"  class="img-rounded" style="position:absolute; top: 70px; right: 100px; height: 60px;">
 				<img src="img/seep.gif"  class="img-rounded" style="position:absolute; top: 70px; left: 50px; height: 40px;">
+				<div id="inner" style="padding-top:60px; padding-left:20px; padding-right:20px;">
+					<!--<h2>Workbench</h2>-->
+					<h3>Deployed Stateful Dataflow Graph</h3>
+					<div id="monitoring_graph" style="height: 300px; border: 1px solid #4297d7;" ></div>
+					<h3>Performance Monitors</h3>
+					<div id="stream_monitor" style="border: 1px solid #4297d7; padding:10px;"></div>
+				</div>
 			</div>
 			
-			<div class="container-fluid" id="main" style="padding-top:60px; padding-left:20px; padding-right:20px;">	
-				<h1>Main Menu</h1>
-
-				<h4>Load query</h4>
-				<form action="/action" enctype="multipart/form-data" method="post">
-					<p>
-						Introduce name of Base class:<br>
-						<input type="text" name="baseclass" size="30">
-					</p>
-					<p>
-						Please specify the query file (.jar):<br>
-						<input type="file" name="queryfile" accept=".jar">
-					</p>
-					<button type="submit" formaction="/action">Go!</button>
-				</form>
-
-				<h4>Submit query to Cluster</h4>
+			<div class="container-fluid" id="query-dialog" title="Query Details" style="z-index: 10001;">
 				<form>
-					<input type="hidden" name="actionid" value="1" />
-					<button type="submit" formaction="/action">Go!</button>
+					<fieldset style="width: 220px;">
+						<input id="query-dialog_query_id" type="hidden" value="" />
+						<textarea name="query-dialog_field" id="query-dialog_field" class="text ui-widget-content ui-corner-all" cols="38" rows="12" ></textarea>
+						<!-- Allow form submission with keyboard without duplicating the dialog button -->
+						<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+					</fieldset>
 				</form>
-
-				<h4>Start query</h4>
-				<form>
-					<input type="hidden" name="actionid" value="2" />
-					<button type="submit" formaction="/action">Go!</button>
-				</form>
-
-				<h4>Stop query</h4>
-				<form>
-					<input type="hidden" name="actionid" value="3" />
-					<button type="submit" formaction="/action">Go!</button>
-				</form>
-
-				<h4>Exit</h4>
-				<form>
-					<input type="hidden" name="actionid" value="100" />
-					<button type="submit" formaction="/action">Go!</button>
-				</form>
-
 			</div>
 			
 			<footer class="footer">
@@ -110,5 +86,6 @@
 					</center>
 				</div>
 			</footer>
+			
 		</body>
 		</html>

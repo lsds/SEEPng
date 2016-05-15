@@ -1,9 +1,76 @@
-<html>
-<head>
-<title>SEEPng Web Administration Interface</title>
-</head>
+<html class="no-js" lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>SEEPng Web Administration Interface</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<body>
-<p>Fail</p>
-</body>
+		<!-- Place favicon.ico and apple-touch-icon(s) in the root directory -->
+
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/jquery-ui.css">
+		<link rel="stylesheet" href="css/cubism.css">
+		<link rel="stylesheet" href="css/font-awesome-4.0.3/css/font-awesome.css">
+		<link rel="stylesheet" href="css/cytoscape.js-panzoom.css" />
+		<link rel="stylesheet" href="css/jquery.qtip.min.css" />
+		<link rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="css/cep-explorer.css">
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+		<!-- Latest compiled JavaScript -->
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		
+		<script src="js/vendor/jquery-2.1.1.js"></script>
+		<script src="js/vendor/arbor.js"></script>
+		<script src="js/vendor/d3.min.js"></script>
+		<script src="js/vendor/cubism.v1.js"></script>
+		<script src="js/vendor/cytoscape.min.js"></script>
+		<script src="js/vendor/jquery-ui.min.js"></script>
+		<script src="js/vendor/cytoscape.js-panzoom.js"></script>
+		<script src="js/vendor/cytoscape.js-cxtmenu.js"></script>
+		<script src="js/vendor/cytoscape.js-qtip.js"></script>
+		<script src="js/vendor/cytoscape.js-edgehandles.js"></script>
+		<script src="js/vendor/jquery.qtip.js"></script>
+		<script src="js/plugins.js"></script>
+		<script src="js/monitoring_graph.js"></script>
+		<script src="js/main.js"></script>
+	</head>
+
+	<body>	
+		<!--[if lt IE 8]>
+			<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+			<![endif]-->
+			<nav class="navbar navbar-inverse">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<a class="navbar-brand" href="#">SEEPng</a>
+					</div>
+					<ul class="nav navbar-nav">
+						<li><a href="#">Home</a></li>
+						<li><a href="#">Query</a></li>
+						<li><a href="#">Metrics</a></li> 
+						<li><a href="#">About</a></li> 
+					</ul>
+				</div>
+			</nav>
+
+			<div class="container-fluid" id="logos" style="width: 100%;">
+				<!-- <img src="img/bp.png" style="position:absolute; top: 20px; right: 270px; height: 50px;"> -->
+				<img src="img/ic.png"  class="img-rounded" style="position:absolute; top: 70px; right: 100px; height: 60px;">
+				<img src="img/seep.gif"  class="img-rounded" style="position:absolute; top: 70px; left: 50px; height: 40px;">
+			</div>
+
+			<div class="container-fluid" id="main" style="padding-top:100px; padding-left:50px; padding-right:20px;">
+				<button class="btn btn-danger btn-primary" type="button">Failed</button>
+			</div>
+			
+			<footer class="footer">
+				<div class="container">
+					<center>
+						<p class="text-muted"> <a href="https://github.com/lsds/Seepng"> SEEP </a> parallel data processing system -  Large-Scale Distributed Systems (LSDS) Group &reg; </p>
+					</center>
+				</div>
+			</footer>
+	</body>
 </html>

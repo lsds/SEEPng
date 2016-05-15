@@ -1,6 +1,8 @@
 package uk.ac.imperial.lsds.seepmaster.ui;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -13,60 +15,80 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.imperial.lsds.seepmaster.ui.web.MetricsHandler;
+import uk.ac.imperial.lsds.seepmaster.ui.web.MetricsRestAPIHandler;
+import uk.ac.imperial.lsds.seepmaster.ui.web.QueriesHandler;
+import uk.ac.imperial.lsds.seepmaster.ui.web.RestAPIRegistryEntry;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.InfrastructureManager;
 import uk.ac.imperial.lsds.seepmaster.query.GenericQueryManager;
-import uk.ac.imperial.lsds.seepmaster.ui.web.WebUIHandler;
+import uk.ac.imperial.lsds.seepmaster.ui.web.WebUIMainServlet;
 
 public class WebUI implements UI{
 
 	final private static Logger LOG = LoggerFactory.getLogger(WebUI.class);
 	
-	private WebUIHandler actionHandler;
-	
-	private Server server;
+	/** Folder where all html, js etc. files are located **/
+	private String baseDirectory = "webui";
+	private WebUIMainServlet actionHandler;
+	private Server jettyServer;
 	
 	public WebUI(GenericQueryManager qm, InfrastructureManager inf){
-		actionHandler = new WebUIHandler(qm, inf);
+		actionHandler = new WebUIMainServlet(qm, inf);
 		silenceJettyLogger();
-		this.server = new Server(8888);
+		this.jettyServer = new Server(8888);
 		
-		// Configure resourceHandler
+		/**
+		 * Configure Multiple Handlers here - Accessed through Restful API 
+		 * 1) Action Handler for users to upload queries ( Path: /action )
+		 * 2) Metric Handler for query Metrics ( Path: /metric )
+		 * 3) DefaultHandler for everything else (?)
+		 */
+		
+		// Configure resourceHandler - used for static content 
 		ResourceHandler mainHandler = new ResourceHandler();
 		mainHandler.setDirectoriesListed(true);
         mainHandler.setWelcomeFiles(new String[]{ "index.html" });
-        String baseDirectory = "webui";
         URL url = this.getClass().getClassLoader().getResource(baseDirectory);
         String basePath = url.toExternalForm();
-        //String path = WebUI.class.getResource("/webui").getPath();
-        //mainHandler.setResourceBase(url.getPath());
         mainHandler.setResourceBase(basePath);
         
         LOG.info("Web resource base: {}", mainHandler.getBaseResource());
         
-        // Configure servletHandler
-        ServletHandler sHandler = new ServletHandler();
-        ServletHolder sh = new ServletHolder(actionHandler);
-        sHandler.addServletWithMapping(sh, "/action");
+        /** Configure User-Actions servletHandler **/
+        ServletHandler actionServletHandler = new ServletHandler();
+        actionServletHandler.addServletWithMapping(new ServletHolder(actionHandler), "/action");
         
-        // Configure all handlers
+        /** Configure Metrics Rest API **/
+        Map<String, RestAPIRegistryEntry> metricsRestAPIRegistry = new HashMap<String, RestAPIRegistryEntry>();
+        metricsRestAPIRegistry.put("/queries", new QueriesHandler());
+		// handler for source (with id=s0)
+        metricsRestAPIRegistry.put("/metrics/src0", new MetricsHandler());
+		// handler for first operator (with id=1)
+        metricsRestAPIRegistry.put("/metrics/op1", new MetricsHandler());
+		// handler for second operator (with id=2)
+        metricsRestAPIRegistry.put("/metrics/op2", new MetricsHandler());
+		// handler for sink (with id=3)
+        metricsRestAPIRegistry.put("/metrics/snk3", new MetricsHandler());
+        
+        // Configure ALL handlers using a HandlerList
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { mainHandler, sHandler, new DefaultHandler() });
-        server.setHandler(handlers);
+        handlers.setHandlers(new Handler[] { mainHandler, actionServletHandler, new MetricsRestAPIHandler(metricsRestAPIRegistry), new DefaultHandler() });
+        jettyServer.setHandler(handlers);
         
         // Configure connector
-        ServerConnector http = new ServerConnector(server);
+        ServerConnector http = new ServerConnector(jettyServer);
         http.setHost("localhost");
         http.setPort(8080);
         http.setIdleTimeout(30000);
-        server.addConnector(http);
+        jettyServer.addConnector(http);
 	}
 	
 	@Override
 	public void start() {
 		try {
-			server.start();
-			LOG.info("Web UI running at: {}", server.getURI());
-			server.join();
+			jettyServer.start();
+			LOG.info("Web UI running at: {}", jettyServer.getURI());
+			jettyServer.join();
 			
 		} 
 		catch (Exception e) {
