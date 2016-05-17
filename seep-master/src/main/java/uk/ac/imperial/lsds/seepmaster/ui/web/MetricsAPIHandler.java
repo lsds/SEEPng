@@ -66,12 +66,16 @@ public class MetricsAPIHandler extends AbstractHandler {
 			if(sink.getOperatorId() == op.getOperatorId())
 				continue;
 			else{
+				boolean valid = true;
 				for(LogicalOperator s : sources){
-					if(s.getOperatorId() == op.getOperatorId())
-						continue;
+					if(s.getOperatorId() == op.getOperatorId()){
+						valid = false;
+						break;
+					}
 				}
+				if(valid)
+					restAPIRegistry.put("/metrics/op"+op.getOperatorId(), new MetricsHandler());
 			}
-			restAPIRegistry.put("/metrics/op"+op.getOperatorId(), new MetricsHandler());
         }
 		restAPIRegistry.put("/queries", new QueryHandler(this.slq));
 	}

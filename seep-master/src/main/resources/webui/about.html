@@ -1,0 +1,89 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Place favicon.ico and apple-touch-icon(s) in the root directory -->
+
+	<link rel="stylesheet" href="css/normalize.css">
+	<link rel="stylesheet" href="css/jquery-ui.css">
+	<link rel="stylesheet" href="css/cubism.css">
+	<link rel="stylesheet" href="css/font-awesome-4.0.3/css/font-awesome.css">
+	<link rel="stylesheet" href="css/cytoscape.js-panzoom.css" />
+	<link rel="stylesheet" href="css/jquery.qtip.min.css" />
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/cep-explorer.css">
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<!-- Latest compiled JavaScript -->
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	
+	<script src="js/vendor/jquery-2.1.1.js"></script>
+	<script src="js/vendor/arbor.js"></script>
+	<script src="js/vendor/d3.min.js"></script>
+	<script src="js/vendor/cubism.v1.js"></script>
+	<script src="js/vendor/cytoscape.min.js"></script>
+	<script src="js/vendor/jquery-ui.min.js"></script>
+	<script src="js/vendor/cytoscape.js-panzoom.js"></script>
+	<script src="js/vendor/cytoscape.js-cxtmenu.js"></script>
+	<script src="js/vendor/cytoscape.js-qtip.js"></script>
+	<script src="js/vendor/cytoscape.js-edgehandles.js"></script>
+	<script src="js/vendor/jquery.qtip.js"></script>
+	<script src="js/plugins.js"></script>
+	<script src="js/monitoring_graph.js"></script>
+	<script src="js/main.js"></script>
+</head>
+<body >
+	
+		<!--[if lt IE 8]>
+			<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+			<![endif]-->
+			<nav class="navbar navbar-inverse">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<a class="navbar-brand" href="index.html">Java2SDG</a>
+					</div>
+					<ul class="nav navbar-nav">
+						<li><a href="code.html">Algorith Selection</a></li> 
+						<li><a href="index.html">Query</a></li>
+						<li><a href="execution.html">Execution</a></li>
+						<li class="active"><a href="about.html">About</a></li> 
+					</ul>
+				</div>
+			</nav>
+			<div class="container-fluid" id="logos" style="width: 100%;">
+				<!-- <img src="img/bp.png" style="position:absolute; top: 20px; right: 270px; height: 50px;"> -->
+				<img src="img/ic.png"  class="img-rounded" style="position:absolute; top: 70px; right: 100px; height: 60px;">
+				<img src="img/lsds.png"  class="img-rounded" style="position:absolute; top: 70px; left: 50px; height: 60px;">
+				<div id="inner" style="padding-top:60px; padding-left:20px; padding-right:20px;">
+					<!--<h2>Workbench</h2>-->
+					<h3>SEEP: Real-Time Stateful Big Data Processing</h3>
+					<div id="about" style="height: 300px; border: 1px solid #4297d7;" >
+						<p> As users of big data applications expect fresh results, we witness a new breed of stream processing systems that are designed to scale to large numbers of cloud-hosted machines. Such systems face new challenges: (i) to benefit from the pay-as-you-go model of cloud computing, they must scale out on demand, acquiring additional virtual machines (VMs) and parallelising operators when the workload increases; (ii) failures are common with deployments on hundreds of VMs systems must be fault-tolerant with fast recovery times, yet low per-machine overheads. An open question is how to achieve these two goals when stream queries include stateful operators, which must be scaled out and recovered without affecting query results.</p>
+						<p>The SEEP project explores large scale stream data processing in cloud architectures. The aim is to explore new data management and system mechanisms that enable elastic data processing, provisioning more resources when computing demand increases and decommisioning them when are no longer necessary. Elasticity is an important property due to the cost-per-cycle of the cloud, and equally important is fault tolerance. The system needs to recover after failures to cope with the incoming data, and the process needs to be efficient, since failures are common in large clusters. The main challenge is to provide these two important properties when we handle stateful operators, which improve the applicability of the system to more domains and thus the applications that can benefit from it. We propose an integrated approach to scale out stateful operators while maintaining fault tolerance. In SEEP we make the internal state of operators explicit, exposing it to the system, in order to scale out operators and recover them after failures. This contribution allows us to build more complex models and applications, that can benefit now from the state externalisation.</p>
+					</div>
+
+					<div id="about" style="height: 300px;" >
+						<h3>Implementation and source code</h3>
+						<ul><li>The <a href="http://lsds.github.io/SEEPng/">SEEP prototype implementation</a> is available on GitHub.</li></ul>
+						<h3>SEEP applications</h3>
+						<ul><li>The <a href="http://lsds.github.io/SEEP/">Java2SDG compiler</a> is available on GitHub.</li></ul>
+						<ul><li><a href="//lsds.doc.ic.ac.uk/projects/SEEP/DEBS-GC14">SEEP-based solution to the ACM DEBS Grand Challenge</a></li></ul>
+					</div>
+			</div>
+			
+			
+			<footer class="footer">
+				<div class="container">
+					<center>
+						<p class="text-muted"> <a href="https://github.com/lsds/Seepng"> SEEP </a> parallel data processing system -  Large-Scale Distributed Systems (LSDS) Group &reg; </p>
+					</center>
+				</div>
+			</footer>
+			
+		</body>
+		</html>
