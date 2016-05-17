@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jetty.util.MultiMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetricsHandler implements RestAPIRegistryEntry {
 
@@ -22,6 +24,8 @@ public class MetricsHandler implements RestAPIRegistryEntry {
 	private Map<Long, Float> throughput;
 	private Map<Long, Float> cpuUsage;
 	private Map<Long, Float> memoryUsage;
+	
+	final private static Logger LOG = LoggerFactory.getLogger(MetricsHandler.class.getCanonicalName());
 	
 	public MetricsHandler() {
 		throughput = new HashMap<Long, Float>();
@@ -31,10 +35,9 @@ public class MetricsHandler implements RestAPIRegistryEntry {
 	
 	public Object getAnswer(MultiMap<String> reqParameters) {
 		
-		// check Metric Mode - Currently supporting (cpu, mem, throughput)
+		/* Metric Mode - Currently supporting CPU, MEMORY, THROUGHPUT */
 		Metric_Mode mode = Metric_Mode.toMode(reqParameters.get("mode").get(0));		
-		System.out.println("MetricsHandler.getAnswer()  Mode:  " + mode);
-		
+		LOG.debug("getAnswer()  Mode:  {}", mode);
 
 		Map<Long, Float> metricToReturn;
 		switch(mode){

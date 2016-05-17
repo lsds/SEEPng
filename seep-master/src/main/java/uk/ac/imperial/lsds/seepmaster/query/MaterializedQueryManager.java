@@ -314,5 +314,12 @@ public class MaterializedQueryManager implements QueryManager {
 		comm.send_object_sync(materializeCommand, connections, k);
 		LOG.info("Sending materialize task command to nodes...OK");
 	}
+
+	/**
+	 * @return the slq
+	 */
+	public SeepLogicalQuery getSlq() {
+		return slq;
+	}
 	
 }

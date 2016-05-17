@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,24 +27,25 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.imperial.lsds.seepmaster.MasterConfig;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.InfrastructureManager;
 import uk.ac.imperial.lsds.seepmaster.query.GenericQueryManager;
 
 public class WebUIMainServlet extends HttpServlet {
 
-	final private static Logger LOG = LoggerFactory.getLogger(WebUIMainServlet.class);
+	final private static Logger LOG = LoggerFactory.getLogger(WebUIMainServlet.class.getCanonicalName());
 	private static final long serialVersionUID = 1L;
 	
-	private final int MAX_MEMORY_SIZE_TO_HOLD_FILE = 1024 * 1024 * 100; // 100 MB
-	private final int MAX_UPLOAD_SIZE_TO_HOLD_FILE = 1024 * 1024 * 100; // 100 MB
+	private final int MAXIMUM_FILE_TO_HOLD_SIZE = 1024 * 1024 * 100; // 100 MB
 	
 	private GenericQueryManager qm;
 	private InfrastructureManager inf;
 	
 	private String pathToJar;
 	private String definitionClass;
-	private String[] queryArgs;
-	private String composeMethod;
+	private String [] queryArgs = new String[]{};
+	private short queryType = 0; // TODO: allow to specify query type here as well
+	private String composeMethod = MasterConfig.COMPOSE_METHOD_NAME;
 
 	public WebUIMainServlet(GenericQueryManager qm, InfrastructureManager inf){
 		this.qm = qm;
@@ -59,21 +59,34 @@ public class WebUIMainServlet extends HttpServlet {
 	
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Get parameter map
-		Map<String, String[]> parameters = request.getParameterMap();
-		String[] actionIdValues = parameters.get("actionid");
-		int actionId = Integer.valueOf(actionIdValues[0]);
-		boolean success = handleAction(actionId);
-		if(!success){
-			response.setContentType("text/html");
-			response.setStatus(HttpServletResponse.SC_OK);
-			response.sendRedirect("fail.html");
+
+		System.out.println("ReQuest Type: "+ request.getMethod());
+		System.out.println("ReQuest URI: "+ request.getRequestURI());
+		System.out.println("Request Parameters: "+ request.getParameterMap());
+		
+		switch (request.getRequestURI()) {
+		case "/action":
+			LOG.info("Handling '/action' Request");
+			//Get Request Parameters
+			String[] actionIdValues = request.getParameterMap().get("actionid");
+			int actionId = Integer.valueOf(actionIdValues[0]);
+			boolean success = handleAction(actionId);
+			if(!success){
+				response.setContentType("text/html");
+				response.setStatus(HttpServletResponse.SC_OK);
+				response.sendRedirect("fail.html");
+			}
+			else{
+				response.setContentType("text/html");
+				response.setStatus(HttpServletResponse.SC_OK);
+				response.sendRedirect("ok.html");
+			}
+			break;
+		default:
+			LOG.info("Handling Unkown Request: '{}'", request.getRequestURI());
+			break;
 		}
-		else{
-			response.setContentType("text/html");
-			response.setStatus(HttpServletResponse.SC_OK);
-			response.sendRedirect("ok.html");
-		}
+		
     }
 	
 	@Override
@@ -116,8 +129,7 @@ public class WebUIMainServlet extends HttpServlet {
 		        pathToJar = processUploadedFile(item);
 		    }
 		}
-		short queryType = 0; // FIXME: allow to specify query type here as well
-		return qm.loadQueryFromFile(queryType, pathToJar, definitionClass, new String[]{}, "compose");
+		return qm.loadQueryFromFile(this.queryType, this.pathToJar, this.definitionClass, this.queryArgs, this.composeMethod);
 	}
 	
 	private String processUploadedFile(FileItem item){
@@ -127,8 +139,7 @@ public class WebUIMainServlet extends HttpServlet {
 			item.write(uploadedFile);
 		} 
 	    catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Write Uploaded File to Disk Exception: \n {} ", e);
 		}
 	    return uploadedFile.getAbsolutePath();
 	}
@@ -137,7 +148,7 @@ public class WebUIMainServlet extends HttpServlet {
 		List<FileItem> items = null;
 		// Create a factory for disk-based file items
 		DiskFileItemFactory factory = new DiskFileItemFactory();
-		factory.setSizeThreshold(MAX_MEMORY_SIZE_TO_HOLD_FILE);
+		factory.setSizeThreshold(MAXIMUM_FILE_TO_HOLD_SIZE);
 		// Configure a repository (to ensure a secure temp location is used)
 		ServletContext servletContext = this.getServletConfig().getServletContext();
 		File repository = (File) servletContext.getAttribute("javax.servlet.context.tempdir");
@@ -145,14 +156,13 @@ public class WebUIMainServlet extends HttpServlet {
 
 		// Create a new file upload handler
 		ServletFileUpload upload = new ServletFileUpload(factory);
-		upload.setSizeMax(MAX_UPLOAD_SIZE_TO_HOLD_FILE);
+		upload.setSizeMax(MAXIMUM_FILE_TO_HOLD_SIZE);
 		// Parse the request
 		try {
 			items = upload.parseRequest(request);
 		} 
 		catch (FileUploadException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Write Uploaded File to Disk Exception: \n {} ", e);
 		}
 		return items;
 	}
@@ -195,7 +205,7 @@ public class WebUIMainServlet extends HttpServlet {
 			LOG.info("Exit");
 			return true;
 		default:
-				
+			LOG.info("Servlet Action: Unknown! "+ action);
 		}
 		return false;
 	}

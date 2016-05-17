@@ -1,7 +1,7 @@
 var master_node_ip = "localhost";
-var master_node_port = 8081;
-var master_node_query_plan_url = "/queries";
-var worker_node_throughput = "/metrics";
+var master_node_port = 8888;
+var master_node_query_plan_url = "/rest/queries";
+var worker_node_throughput = "/rest/metrics";
 
 var cy_monitoring;
 var d_edge, d_edge_form;
