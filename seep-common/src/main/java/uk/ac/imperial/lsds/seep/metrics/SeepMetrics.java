@@ -2,6 +2,7 @@ package uk.ac.imperial.lsds.seep.metrics;
 
 import java.util.concurrent.TimeUnit;
 
+import uk.ac.imperial.lsds.seep.api.operator.LogicalOperator;
 import uk.ac.imperial.lsds.seep.config.Config;
 
 import com.codahale.metrics.ConsoleReporter;
@@ -19,6 +20,8 @@ public class SeepMetrics extends MetricRegistry {
 	private static CsvReporter csvReporter;
 	private static Slf4jReporter slf4jReporter;
 	
+	private static RestApiReporter restReporter;
+	
 	public static void configureMetrics(Config config){
 		// TODO: configure this component
 	}
@@ -35,6 +38,14 @@ public class SeepMetrics extends MetricRegistry {
 				.convertDurationsTo(TimeUnit.MILLISECONDS)
 				.build();
 		consoleReporter.start(period, TimeUnit.SECONDS);
+	}
+	
+	public static void startRestApiReporter(LogicalOperator o, int period){
+		restReporter = RestApiReporter.forRegistry(REG, o)
+				.convertRatesTo(TimeUnit.SECONDS)
+				.convertDurationsTo(TimeUnit.MILLISECONDS)
+				.build();
+		restReporter.start(period, TimeUnit.SECONDS);
 	}
 	
 	public static void startCSVReporter() {

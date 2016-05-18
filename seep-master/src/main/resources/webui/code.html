@@ -64,8 +64,7 @@
   
   @Override
   public SeepProgramConfiguration configure() {
-    SeepProgramConfiguration spc = new SeepProgramConfiguration();
-    
+    SeepProgramConfiguration spc = new SeepProgramConfiguration();   
     Schema schema = SchemaBuilder.getInstance().newField(Type.STRING, "key")
     	.newField(Type.INT, "value").build();
     DataStore netSource = new DataStore(schema, DataStoreType.NETWORK);
@@ -81,10 +80,6 @@
       newCounter = ((Integer)kvstore.get(key)).intValue() + 1;
     }
     kvstore.put(key, new Integer(newCounter));
-    
-    /* Just a printout */
-    if( (value %100000) == 0)
-      System.out.println("[Count] 'Key': "+ key + " 'Value':" + kvstore.get(key)  );
   }
 
   public int read(String key){
@@ -92,9 +87,6 @@
     if(kvstore.containsKey(key)){
       readValue = ((Integer)kvstore.get(key)).intValue();
     }
-    /* Just a printout */
-    if( (readValue %100000) == 0)
-      System.out.println("[Read] 'Key': "+ key + " 'Value':" + readValue );
     return readValue;
   }
 }</code>

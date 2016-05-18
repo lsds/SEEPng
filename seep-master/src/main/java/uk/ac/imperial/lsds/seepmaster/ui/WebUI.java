@@ -32,8 +32,8 @@ public class WebUI implements UI{
 		
 		// used for static content 
 		this.staticContentHanlder = new ResourceHandler();
-		this.actionHandler = new WebUIMainServlet(qm, inf);
 		this.metricsHandler = new MetricsAPIHandler(qm);
+		this.actionHandler = new WebUIMainServlet(qm, this.metricsHandler);
 		
 		
 		this.silenceJettyLogger();

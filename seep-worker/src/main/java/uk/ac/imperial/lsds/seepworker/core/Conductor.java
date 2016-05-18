@@ -35,6 +35,7 @@ import uk.ac.imperial.lsds.seep.core.DataStoreSelector;
 import uk.ac.imperial.lsds.seep.core.OBuffer;
 import uk.ac.imperial.lsds.seep.infrastructure.ControlEndPoint;
 import uk.ac.imperial.lsds.seep.infrastructure.DataEndPoint;
+import uk.ac.imperial.lsds.seep.metrics.SeepMetrics;
 import uk.ac.imperial.lsds.seep.scheduler.ScheduleDescription;
 import uk.ac.imperial.lsds.seep.scheduler.Stage;
 import uk.ac.imperial.lsds.seep.scheduler.StageType;
@@ -146,6 +147,8 @@ public class Conductor {
 		
 		// Make sure selectors are initialised, then request connections
 		coreInput.requestInputConnections(comm, k, myIp);
+		LOG.info("Setting up RestApiReporter");
+		SeepMetrics.startRestApiReporter(o, 1);
 	}
 
 	public void configureScheduleTasks(int id, ScheduleDescription sd) {

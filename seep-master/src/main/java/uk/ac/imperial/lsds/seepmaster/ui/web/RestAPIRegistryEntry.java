@@ -10,10 +10,14 @@ package uk.ac.imperial.lsds.seepmaster.ui.web;
  *     Panagiotis Garefalakis (pg1712@imperial.ac.uk)
  ******************************************************************************/
 
+import java.util.Map;
+
 import org.eclipse.jetty.util.MultiMap;
 
 public interface RestAPIRegistryEntry {
 	
+	/** Used for GET requests **/
 	public Object getAnswer(MultiMap<String> reqParameters);
-
+	/** Used for POST requests **/
+	public Object getPostAnswer(Map<String, String[]> reqParameters);
 }

@@ -80,17 +80,6 @@ public class MetricsAPIHandler extends AbstractHandler {
 		restAPIRegistry.put("/queries", new QueryHandler(this.slq));
 	}
 	
-	public static Map<String, String> getReqParameter(String query) {
-		String[] params = query.split("&");  
-	    Map<String, String> map = new HashMap<String, String>();  
-	    for (String param : params) {  
-	        String name = param.split("=")[0];  
-	        String value = param.split("=")[1];  
-	        map.put(name, value);  
-	    }  
-	    return map;  
-	}
-	
 	public void handle(String target, Request baseRequest,
 			HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
@@ -102,19 +91,10 @@ public class MetricsAPIHandler extends AbstractHandler {
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
-		
-		String [] s = target.split("/");
-//		for (int i = 0; i < s.length; i++) {
-//			System.out.print(String.format("%s (%d chars)", s[i], s[i].length()));
-//			if (i < s.length - 1)
-//				System.out.print(", ");
-//		}
-//		System.out.println();
-		
-		LOG.debug("Request Method: {}", baseRequest.getMethod());
+	
 		
 		if (!this.restAPIRegistry.containsKey(target)) {
-			System.out.println("[DEBUG] Request NOT internally handled");
+			LOG.error("Request: {} NOT internally handled", baseRequest);
 			baseRequest.setHandled(true);
 			if (callback != null) 
 				response.getWriter().println(callback + "(" + mapper.writeValueAsString(this.restAPIRegistry.keySet()) + ")");
@@ -132,10 +112,21 @@ public class MetricsAPIHandler extends AbstractHandler {
 			else if (baseRequest.getMethod().equals("POST")) {
 				baseRequest.setHandled(true);
 				if (callback != null) 
-					response.getWriter().println(callback + "(" + mapper.writeValueAsString(this.restAPIRegistry.get(target).getAnswer(baseRequest.getQueryParameters())) + ")");
+					response.getWriter().println(callback + "(" + mapper.writeValueAsString(this.restAPIRegistry.get(target).getPostAnswer(baseRequest.getParameterMap())) + ")");
 				else 
-					response.getWriter().println(mapper.writeValueAsString(this.restAPIRegistry.get(target).getAnswer(baseRequest.getQueryParameters())));
+					response.getWriter().println(mapper.writeValueAsString(this.restAPIRegistry.get(target).getPostAnswer(baseRequest.getParameterMap())));
 			}
 		}
+	}
+	
+	public static Map<String, String> getReqParameters(String query) {
+		String[] params = query.split("&");  
+	    Map<String, String> map = new HashMap<String, String>();  
+	    for (String param : params) {  
+	        String name = param.split("=")[0];  
+	        String value = param.split("=")[1];  
+	        map.put(name, value);  
+	    }  
+	    return map;  
 	}
 }

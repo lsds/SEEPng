@@ -52,7 +52,7 @@ public class SingleThreadProcessingEngine implements ProcessingEngine {
 		this.MAX_BLOCKING_TIME_PER_INPUTADAPTER_MS = wc.getInt(WorkerConfig.MAX_WAIT_TIME_PER_INPUTADAPTER_MS);
 		this.worker = new Thread(new Worker());
 		this.worker.setName(this.getClass().getSimpleName());
-		m = SeepMetrics.REG.meter(name(SingleThreadProcessingEngine.class, "event", "per", "sec"));
+		this.m = SeepMetrics.REG.meter(name(SingleThreadProcessingEngine.class, "event", "per", "sec"));
 	}
 
 	@Override

@@ -9,6 +9,7 @@ var d_edge, d_edge_form;
 var graph_type_source   = { weight: 5, color: '#4297d7', shape: 'triangle' };
 var graph_type_sink     = { weight: 5, color: '#4297d7', shape: 'octagon' };
 var graph_type_query    = { weight: 7, color: '#e17009', shape: 'ellipse' };
+var graph_type_state    = { weight: 7, color: '#ff0000', shape: 'hexagon' };
 var graph_edge_defaults = { color: '#4297d7', strength: 1 };
 
 var graph_node_id = 0;

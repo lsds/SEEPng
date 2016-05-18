@@ -66,6 +66,8 @@ public class MetricsHandler implements RestAPIRegistryEntry {
 			long start = Long.valueOf(reqParameters.getValue("start",0));
 			long stop  = Long.valueOf(reqParameters.getValue("stop",0));
 			
+			LOG.debug("Start: {} Stop: {} Step: {}",reqParameters.getValue("start",0), reqParameters.getValue("stop",0), reqParameters.getValue("step",0));
+			
 			List<Long> tmpResult = new ArrayList<Long>();
 			List<Long> outdated = new ArrayList<Long>();
 			synchronized(metricToReturn) {
@@ -82,54 +84,49 @@ public class MetricsHandler implements RestAPIRegistryEntry {
 			/*
 			 * Is there a step to consider?
 			 */
-			long step = -1;
-			if (reqParameters.containsKey("step"))
-				step = Long.valueOf(reqParameters.getValue("step",0));
-			
-			if (step != -1) {
-				
-				long stepEnd = start + step;
-				int i = 0;
-				do {
-					if (i < tmpResult.size()) {
-						Long t = tmpResult.get(i);
-						if (t < stepEnd) {
-							result.add(metricToReturn.get(t));
-							while ((t < stepEnd) && i < tmpResult.size())
-								t = tmpResult.get(i++);
-						}
-						else {
-							result.add(null);
-						}
-					}
-					else 
-						result.add(null);
-					
-					stepEnd += step;
-				}
-				while (stepEnd <= stop);
-			}
-			else {
+//			long step = -1;
+//			if (reqParameters.containsKey("step"))
+//				step = Long.valueOf(reqParameters.getValue("step",0));
+//			
+//			if (step != -1) {
+//				
+//				long stepEnd = start + step;
+//				int i = 0;
+//				do {
+//					if (i < tmpResult.size()) {
+//						Long t = tmpResult.get(i);
+//						if (t < stepEnd) {
+//							result.add(metricToReturn.get(t));
+//							while ((t < stepEnd) && i < tmpResult.size())
+//								t = tmpResult.get(i++);
+//						}
+//						else {
+//							result.add(null);
+//						}
+//					}
+//					else 
+//						result.add(null);
+//					
+//					stepEnd += step;
+//				}
+//				while (stepEnd <= stop);
+//			}
+//			else {
 				for (Long t : tmpResult)
 					result.add(metricToReturn.get(t)); 
-			}
-		}
-		else {
-			/*
-			 * No time window
-			 */
-			synchronized(metricToReturn) {
-				result.addAll(metricToReturn.values());
-				metricToReturn.clear();
-			}
+//			}
+//		}
+//		else {
+//			/*
+//			 * No time window
+//			 */
+//			synchronized(metricToReturn) {
+//				result.addAll(metricToReturn.values());
+//				metricToReturn.clear();
+//			}
 		}
 
-		/*################################################################
-		 * 
-		 * DUMMY CODE
-		 * should be deleted once the measurement maps are actually filled
-		 * 
-		 */
+		/*################################################################ 
 		result.clear();
 		long start = Long.valueOf(reqParameters.getValue("start",0));
 		long stop  = Long.valueOf(reqParameters.getValue("stop",0));
@@ -139,5 +136,33 @@ public class MetricsHandler implements RestAPIRegistryEntry {
 		/*################################################################*/
 		
 		return result;
+	}
+	
+	@Override
+	public Object getPostAnswer(Map<String, String[]> reqParameters) {
+		/* Metric Mode - Currently supporting CPU, MEMORY, THROUGHPUT */
+		Metric_Mode mode = Metric_Mode.toMode(reqParameters.get("mode")[0]);		
+		String value = reqParameters.get("value")[0];
+		
+		LOG.debug("getPostAnswer()  Mode:  {} Value: {}", mode, value);
+		
+		Map<Long, Float> metricMode;
+		switch(mode){
+			case CPU :
+				metricMode = this.cpuUsage;
+				break;
+			case MEMORY :
+				metricMode = this.memoryUsage;
+				break;
+			case THROUGHPUT:
+				metricMode = this.throughput;
+				break;
+			default:
+				metricMode = null;
+				break;
+		}
+		metricMode.put(System.currentTimeMillis(), Float.valueOf(value));
+		
+		return "OK";
 	}
 }

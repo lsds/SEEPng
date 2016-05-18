@@ -75,7 +75,8 @@ public class QueryHandler implements RestAPIRegistryEntry {
 				procesorDetails.put("id", "op" + op.getOperatorId());
 				procesorDetails.put("type", "graph_type_query");
 				procesorDetails.put("name", "SEEP Processor "+op.getOperatorId());
-				procesorDetails.put("query", "SELECT AVG(att) <br />FROM stream [ROW 1]");
+//				procesorDetails.put("query", "SELECT AVG(att) <br />FROM stream [ROW 1]");
+				procesorDetails.put("query", "Operator "+op.getSeepTask().getClass());
 				Map<String, Object> nData = new HashMap<String, Object>();
 				nData.put("data", procesorDetails);
 				nodes.add(nData);
@@ -87,12 +88,29 @@ public class QueryHandler implements RestAPIRegistryEntry {
 		 */
 		Map<String, Object> sinkDetails = new HashMap<String, Object>();
 		sinkDetails.put("id", "snk" + sink.getOperatorId());
-		sinkDetails.put("type", "sinkDetails");
+		sinkDetails.put("type", "graph_type_sink");
 		sinkDetails.put("name", "Data Stream Sink");
 		sinkDetails.put("query", "Data Stream Sink");
 		Map<String, Object> nData = new HashMap<String, Object>();
 		nData.put("data", sinkDetails);
-		nodes.add(nData);	
+		nodes.add(nData);
+		
+		/*
+		 * State
+		 */
+		for(LogicalOperator op : this.slq.getAllOperators()){
+			if(op.getState() != null){
+				Map<String, Object> stateDetails = new HashMap<String, Object>();
+				stateDetails.put("id", "state" + op.getState().getClass());
+				stateDetails.put("type", "graph_type_state");
+				stateDetails.put("name", "SEEP State");
+				stateDetails.put("query", "Mutable SeepState");
+				Map<String, Object> stateData = new HashMap<String, Object>();
+				stateData.put("data", stateDetails);
+				nodes.add(stateData);
+			}
+		}
+		
 	}
 	public void initEdgesInformation(){
 		int StreamID = 1;
@@ -144,20 +162,37 @@ public class QueryHandler implements RestAPIRegistryEntry {
 					eData.put("data", eDetails);
 					edges.add(eData);
 				}
-			}
-			
+			}	
 		}
 		
+		/*
+		 * State
+		 */
+		for(LogicalOperator op : this.slq.getAllOperators()){
+			if(op.getState() != null){
+				Map<String, Object> eDetails = new HashMap<String, Object>();
+				eDetails.put("streamid", "e" + StreamID++);
+				eDetails.put("source", "state"+op.getState().getClass());
+				eDetails.put("target", "op"+op.getOperatorId());
+				eDetails.put("type", "graph_edge_defaults");
+				Map<String, Object> eData = new HashMap<String, Object>();
+				eData.put("data", eDetails);
+				edges.add(eData);
+			}
+		}
 	}
 	
+	@Override
 	public Object getAnswer(MultiMap<String> reqParameters) {
-		
 		LOG.debug("getAnswer() Params: {} ", reqParameters.toString());
-		
 		qpInformation.put("nodes", nodes);
 		qpInformation.put("edges", edges);
-		return qpInformation;
-		
+		return qpInformation;	
 	}
 
+	@Override
+	public Object getPostAnswer(Map<String, String[]> reqParameters) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

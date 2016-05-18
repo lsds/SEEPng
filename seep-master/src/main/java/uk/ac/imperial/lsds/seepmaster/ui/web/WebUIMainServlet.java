@@ -39,7 +39,7 @@ public class WebUIMainServlet extends HttpServlet {
 	private final int MAXIMUM_FILE_TO_HOLD_SIZE = 1024 * 1024 * 100; // 100 MB
 	
 	private GenericQueryManager qm;
-	private InfrastructureManager inf;
+	private MetricsAPIHandler metricsHandler;
 	
 	private String pathToJar;
 	private String definitionClass;
@@ -47,9 +47,9 @@ public class WebUIMainServlet extends HttpServlet {
 	private short queryType = 0; // TODO: allow to specify query type here as well
 	private String composeMethod = MasterConfig.COMPOSE_METHOD_NAME;
 
-	public WebUIMainServlet(GenericQueryManager qm, InfrastructureManager inf){
+	public WebUIMainServlet(GenericQueryManager qm, MetricsAPIHandler metricsHandler){
 		this.qm = qm;
-		this.inf = inf;
+		this.metricsHandler = metricsHandler;
 	}
 	
 	@Override
@@ -129,7 +129,11 @@ public class WebUIMainServlet extends HttpServlet {
 		        pathToJar = processUploadedFile(item);
 		    }
 		}
-		return qm.loadQueryFromFile(this.queryType, this.pathToJar, this.definitionClass, this.queryArgs, this.composeMethod);
+		
+		boolean success  = qm.loadQueryFromFile(this.queryType, this.pathToJar, this.definitionClass, this.queryArgs, this.composeMethod);
+		this.metricsHandler.configureAPI();
+		
+		return success;
 	}
 	
 	private String processUploadedFile(FileItem item){
