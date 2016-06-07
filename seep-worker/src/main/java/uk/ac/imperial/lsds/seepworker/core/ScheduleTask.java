@@ -41,6 +41,10 @@ public class ScheduleTask implements SeepTask {
 		}
 		this.taskIterator = tasks.iterator();
 	}
+
+	public Deque<LogicalOperator> __get_operators() {
+		return operators;
+	}
 	
 	public static ScheduleTask buildTaskFor(int id, Stage s, ScheduleDescription sd) {
 		Deque<Integer> wrappedOps = s.getWrappedOperators();
@@ -74,22 +78,64 @@ public class ScheduleTask implements SeepTask {
 
 	@Override
 	public void processData(ITuple data, API api) {
+//		API scApi = new SimpleCollector();
+//		SeepTask next = taskIterator.next(); // Get first, and possibly only task here
+//		// Check whether there are tasks ahead
+//		while(taskIterator.hasNext()) {
+//			// There is a next OP, we simply need to collect output
+//
+//			next.processData(data, scApi);
+//			byte[] o = ((SimpleCollector)scApi).collect();
+//			LogicalOperator nextOp = opIt.next();
+//			Schema schema = nextOp.downstreamConnections().get(0).getSchema(); // 0 cause there's only 1
+//			data = new ITuple(schema);
+//			data.setData(o);
+//			// Otherwise we simply forward the data
+//			next = taskIterator.next();
+//		}
+//		// Finally use real API for real forwarding
+//		next.processData(data, api);
+//		// Then reset iterators for more processing
+//		taskIterator = tasks.iterator();
+//		opIt = operators.iterator();
+
 		API scApi = new SimpleCollector();
 		SeepTask next = taskIterator.next(); // Get first, and possibly only task here
 		// Check whether there are tasks ahead
-		while(taskIterator.hasNext()) {
+
+		boolean isFirstTime = true;
+		byte[] o = null;
+
+		while (taskIterator.hasNext()) {
+
+			isFirstTime = false;
 			// There is a next OP, we simply need to collect output
+
 			next.processData(data, scApi);
-			byte[] o = ((SimpleCollector)scApi).collect();
-			LogicalOperator nextOp = opIt.next();
-			Schema schema = nextOp.downstreamConnections().get(0).getSchema(); // 0 cause there's only 1
-			data = new ITuple(schema);
-			data.setData(o);
-			// Otherwise we simply forward the data
+
+			api.updateIfStillHasMoreData(scApi.hasMoreData());
+
+			o = ((SimpleCollector) scApi).collect();
+
+			if(o !=null){
+				LogicalOperator nextOp = opIt.next();
+				Schema schema = nextOp.downstreamConnections().get(0).getSchema(); // 0 cause there's only 1
+				data = new ITuple(schema);
+				data.setData(o);
+				// Otherwise we simply forward the data
+
+			}
 			next = taskIterator.next();
 		}
 		// Finally use real API for real forwarding
-		next.processData(data, api);
+		if(o !=null){
+			next.processData(data, api);
+		}
+
+		if(isFirstTime){
+			next.processData(data, api);
+		}
+
 		// Then reset iterators for more processing
 		taskIterator = tasks.iterator();
 		opIt = operators.iterator();

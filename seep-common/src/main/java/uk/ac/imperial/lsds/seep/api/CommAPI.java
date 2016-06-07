@@ -1,7 +1,6 @@
 package uk.ac.imperial.lsds.seep.api;
 
 
-
 public interface CommAPI {
 	
 	public void send(byte[] o);
@@ -14,5 +13,7 @@ public interface CommAPI {
 	public void sendStreamidKey(int streamId, byte[] o, String key);
 	public void send_index(int index, byte[] o);
 	public void send_opid(int opId, byte[] o);
-	
+
+	public boolean hasMoreData();
+	public void updateIfStillHasMoreData(boolean hasMoreData);
 }

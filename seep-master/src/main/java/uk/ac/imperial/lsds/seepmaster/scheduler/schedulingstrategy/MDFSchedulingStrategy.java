@@ -1,16 +1,8 @@
 package uk.ac.imperial.lsds.seepmaster.scheduler.schedulingstrategy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import uk.ac.imperial.lsds.seep.api.DataReference;
-import uk.ac.imperial.lsds.seep.api.RuntimeEvent;
-import uk.ac.imperial.lsds.seep.api.RuntimeEventTypes;
-import uk.ac.imperial.lsds.seep.api.SeepChooseTask;
+import uk.ac.imperial.lsds.seep.api.*;
 import uk.ac.imperial.lsds.seep.comm.protocol.Command;
 import uk.ac.imperial.lsds.seep.scheduler.Stage;
 import uk.ac.imperial.lsds.seep.scheduler.StageType;
@@ -111,7 +103,10 @@ public class MDFSchedulingStrategy implements SchedulingStrategy {
 				for(List<RuntimeEvent> re : rEvents.values()) {
 					for(RuntimeEvent r : re) { 
 						if(r.getEvaluateResultsRuntimeEvent().type() == RuntimeEventTypes.EVALUATE_RESULT.ofType()) {
-							evalResult.add(r.getEvaluateResultsRuntimeEvent().getEvaluateResults());
+
+							EvaluateResultsRuntimeEvent e = r.getEvaluateResultsRuntimeEvent();
+							Object o = e.getEvaluateResults();
+							evalResult.add(o);
 						}
 					}
 				}

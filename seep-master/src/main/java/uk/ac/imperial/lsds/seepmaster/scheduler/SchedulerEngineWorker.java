@@ -199,8 +199,13 @@ public class SchedulerEngineWorker implements Runnable {
 			}
 		}
 		// If dataStore was not set above, then there is a real source operator, that we set here
+//		if(dataStore == null) {
+//			dataStore = src.upstreamConnections().iterator().next().getUpstreamOperator().upstreamConnections().iterator().next().getDataStore();
+//		}
+
+		// If dataStore was not set above, then there is a real source operator, that we set here
 		if(dataStore == null) {
-			dataStore = src.upstreamConnections().iterator().next().getUpstreamOperator().upstreamConnections().iterator().next().getDataStore();
+			dataStore = src.upstreamConnections().iterator().next().getDataStore();
 		}
 		
 		int streamId = 0; // only one streamId for sources in scheduled mode	

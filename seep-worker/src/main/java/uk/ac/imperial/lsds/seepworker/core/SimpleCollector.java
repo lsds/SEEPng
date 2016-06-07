@@ -2,6 +2,7 @@ package uk.ac.imperial.lsds.seepworker.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import uk.ac.imperial.lsds.seep.api.API;
 import uk.ac.imperial.lsds.seep.api.RuntimeEvent;
@@ -18,6 +19,9 @@ public class SimpleCollector implements API {
 	public SimpleCollector() { 
 		this.rEvents = new ArrayList<>();
 	}
+
+	//FIXME: HACK
+	private AtomicBoolean hasMoreData = new AtomicBoolean(true);
 	
 	@Override
 	public int id() {
@@ -132,6 +136,14 @@ public class SimpleCollector implements API {
 	public void storeEvaluateResults(Object obj) {
 		evaluationResults = RuntimeEventFactory.makeEvaluateResults(obj);
 		//this.rEvents.add(re);
+	}
+
+	public boolean hasMoreData(){
+		return hasMoreData.get();
+	}
+
+	public void updateIfStillHasMoreData(boolean val){
+		hasMoreData.set(val);
 	}
 
 }
