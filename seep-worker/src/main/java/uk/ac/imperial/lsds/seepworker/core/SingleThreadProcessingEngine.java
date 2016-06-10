@@ -2,10 +2,7 @@ package uk.ac.imperial.lsds.seepworker.core;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.imperial.lsds.seep.api.API;
 import uk.ac.imperial.lsds.seep.api.SeepTask;
 import uk.ac.imperial.lsds.seep.api.data.ITuple;
+import uk.ac.imperial.lsds.seep.api.operator.LogicalOperator;
 import uk.ac.imperial.lsds.seep.api.state.SeepState;
 import uk.ac.imperial.lsds.seep.core.InputAdapter;
 import uk.ac.imperial.lsds.seep.core.InputAdapterReturnType;
@@ -127,6 +125,30 @@ public class SingleThreadProcessingEngine implements ProcessingEngine {
 					// Reset iteration before the last element
 					if(i == inputAdapters.size()-1 && working) {
 						i = -1;
+
+						if(task instanceof ScheduleTask) {
+							ScheduleTask st = (ScheduleTask)task;
+							List<LogicalOperator> operators = st.__get_operators();
+							Iterator<LogicalOperator> it2 = operators.iterator();
+
+							while(it2.hasNext()) {
+								LogicalOperator logicalOperator = it2.next();
+								if (logicalOperator.getOperatorId() == 1){ //Source-op-id
+									if (m.getCount() == 0) {
+										while(api.hasMoreData()){
+											task.processData(null, api);
+											// FIXME: hack -> just exhaust the iterator to force out of the loop
+											//while (it.hasNext()) it.next();
+											//System.out.println("ERROR HERE, fix HACK");
+											// continue;
+										}
+										working = false;
+										//callback.notifyOk(api.getRuntimeEvents()); // notify and pass all generated runtime events
+									}
+								}
+								//exhaust the iterator
+								while (it2.hasNext()) it2.next();
+															}						}
 					}
 					if(! callback.isContinuousTask()) {
 						if(ongoingStreams == 0) {

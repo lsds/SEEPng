@@ -253,7 +253,7 @@ public class Utils {
 			}
 			compose = baseI.getDeclaredMethod(methodName, (Class<?>[])null);
 			toReturn = (T) compose.invoke(baseInstance, (Object[])null);
-			ucl.close();
+//			ucl.close(); //If close() is called, most user-defined classes in applications cannot be recognised
 		}
 		catch (SecurityException e) {
 			e.printStackTrace();
@@ -276,9 +276,9 @@ public class Utils {
 		catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} 
-		catch (IOException e) {
-			e.printStackTrace();
-		}
+//		catch (IOException e) {
+//			e.printStackTrace();
+//		}
 		//Finally we return the queryPlan
 		return toReturn;
 	}
