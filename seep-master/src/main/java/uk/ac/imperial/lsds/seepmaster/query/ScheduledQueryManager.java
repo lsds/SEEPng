@@ -42,6 +42,8 @@ import uk.ac.imperial.lsds.seepmaster.scheduler.schedulingstrategy.SchedulingStr
 
 import com.esotericsoftware.kryo.Kryo;
 
+import com.esotericsoftware.kryo.Kryo;
+
 public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 
 	final private Logger LOG = LoggerFactory.getLogger(ScheduledQueryManager.class);
