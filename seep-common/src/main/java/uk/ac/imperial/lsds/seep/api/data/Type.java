@@ -295,7 +295,6 @@ public abstract class Type {
 //            val.limit(size);
 //            buffer.position(buffer.position() + size);
 //            return val;
-
 			int length = buffer.getInt();
 			byte[] bytes = new byte[length];
 			buffer.get(bytes);
@@ -309,7 +308,6 @@ public abstract class Type {
 //            buffer.putInt(arg.remaining());
 //            buffer.put(arg);
 //            arg.position(pos);
-
 			byte[] bytes = (byte[]) o;
 			buffer.putInt(bytes.length);
 			buffer.put(bytes);

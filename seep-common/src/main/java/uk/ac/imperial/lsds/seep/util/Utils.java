@@ -253,7 +253,7 @@ public class Utils {
 			}
 			compose = baseI.getDeclaredMethod(methodName, (Class<?>[])null);
 			toReturn = (T) compose.invoke(baseInstance, (Object[])null);
-//			ucl.close(); //If close() is called, most user-defined classes in applications cannot be recognised
+//			ucl.close();
 		}
 		catch (SecurityException e) {
 			e.printStackTrace();
