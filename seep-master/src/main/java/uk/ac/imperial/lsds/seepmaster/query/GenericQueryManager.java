@@ -1,5 +1,6 @@
 package uk.ac.imperial.lsds.seepmaster.query;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -32,6 +33,8 @@ public class GenericQueryManager implements QueryManager {
 	private Map<Integer, ControlEndPoint> opToEndpointMapping;
 	private Comm comm;
 	private LifecycleManager lifeManager;
+
+	private boolean enableRestAPI;
 	
 	public static GenericQueryManager getInstance(InfrastructureManager inf, 
 			Map<Integer, ControlEndPoint> mapOpToEndPoint, 
@@ -54,6 +57,7 @@ public class GenericQueryManager implements QueryManager {
 		this.comm = comm;
 		this.lifeManager = lifeManager;
 		this.mc = mc;
+		this.enableRestAPI = false;
 	}
 	
 	@Override
@@ -76,13 +80,15 @@ public class GenericQueryManager implements QueryManager {
 	}
 	
 	@Override
-	public boolean loadQueryFromFile(short queryType, String pathToQueryJar, String definitionClassName, String[] queryArgs, String composeMethodName) {
+	public boolean loadQueryFromFile(short queryType, String pathToQueryJar, String definitionClassName, String[] queryArgs, String composeMethodName, boolean enable_rest_api) {
 		// Check whether the action is valid, but GenericQueryManager does not change Lifecycle
 		boolean allowed = lifeManager.canTransitTo(LifecycleManager.AppStatus.QUERY_SUBMITTED);
 		if(!allowed){
 			LOG.error("Attempt to violate application lifecycle");
 			return false;
 		}
+
+		this.setEnableRestAPI(enable_rest_api);
 		// TODO: do something with the type at this point
 		if(queryType == QueryType.SEEPLOGICALQUERY.ofType()) {
 			// get logical query
@@ -146,7 +152,26 @@ public class GenericQueryManager implements QueryManager {
 	public boolean stopQuery() {
 		return this.qm.stopQuery();
 	}
-	
+
+	@Override
+	public void setEnableRestAPI(boolean enableRestAPI_opt) {
+		this.enableRestAPI = enableRestAPI_opt;
+	}
+
+	@Override
+	public Map<String, Object> extractQueryOperatorsInformation() {
+		Map<String, Object> nDetails = new HashMap<>();
+
+		// Check whether the action is valid, but GenericQueryManager does not change Lifecycle
+		boolean allowed = lifeManager.canTransitTo(LifecycleManager.AppStatus.QUERY_DEPLOYED) || lifeManager.canTransitTo(LifecycleManager.AppStatus.QUERY_SUBMITTED);
+		if(!allowed){
+			LOG.error("Application trying to extract query operators information without being submitted");
+			return nDetails;
+		}
+
+		return qm.extractQueryOperatorsInformation();
+	}
+
 	public QueryManager getQueryManager() {
 		return qm;
 	}

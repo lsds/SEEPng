@@ -30,9 +30,15 @@ public class MasterConfig extends Config {
     													+ "Physical cluster(0), yarn container(1), lxc, docker, etc";
     public static final String CONTROL_PORT = "master.port";
     private static final String CONTROL_PORT_DOC = "Port that listens to commands from workers";
-    
-    public static final String UI_TYPE = "ui.type";
-    private static final String UI_TYPE_DOC = "The type of UI chosen, simpleconsole(0), console(1), web(2), etc";
+
+	public static final String UI_TYPE = "ui.type";
+	private static final String UI_TYPE_DOC = "The type of UI chosen, simpleconsole(0), console(1), web(2), etc";
+
+	public static final String REST_API_ENABLED = "enable.restapi";
+	private static final String REST_API_DOC = "Enable the RESTful API (true) to query SEEPng execution evolution through a web interface";
+
+	public static final String REST_API_MASTER_PORT = "restapi.port";
+	private static final String REST_API_MASTER_PORT_DOC = "Port over which the RESTful API services are offered";
     
     public static final String SCHED_STRATEGY = "scheduling.strategy.type";
     private static final String SCHED_STRATEGY_DOC = "The scheduling strategy for scheduled queries: sequential(0), mdf(3) etc";
@@ -58,6 +64,8 @@ public class MasterConfig extends Config {
 				.define(DEPLOYMENT_TARGET_TYPE, Type.INT, 0, Importance.HIGH, DEPLOYMENT_TARGET_TYPE_DOC)
 				.define(CONTROL_PORT, Type.INT, 3500, Importance.HIGH, CONTROL_PORT_DOC)
 				.define(UI_TYPE, Type.INT, 0, Importance.HIGH, UI_TYPE_DOC)
+				.define(REST_API_ENABLED, Type.STRING, "false", Importance.LOW, REST_API_DOC)
+				.define(REST_API_MASTER_PORT, Type.INT, 8081, Importance.LOW, REST_API_MASTER_PORT_DOC)
 				.define(SCHED_STRATEGY, Type.INT, 0, Importance.LOW, SCHED_STRATEGY_DOC)
 				.define(MEM_MANAGEMENT_POLICY, Type.INT, 0, Importance.LOW, MEM_MANAGEMENT_POLICY_DOC)
 				.define(PROPERTIES_FILE, Type.STRING, Importance.LOW, PROPERTIES_FILE_DOC)

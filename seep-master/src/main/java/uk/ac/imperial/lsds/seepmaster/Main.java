@@ -16,11 +16,13 @@ import uk.ac.imperial.lsds.seep.comm.serialization.JavaSerializer;
 import uk.ac.imperial.lsds.seep.config.CommandLineArgs;
 import uk.ac.imperial.lsds.seep.config.ConfigKey;
 import uk.ac.imperial.lsds.seep.infrastructure.ControlEndPoint;
+import uk.ac.imperial.lsds.seepmaster.infrastructure.master.api.RestAPIQueryManager;
 import uk.ac.imperial.lsds.seep.util.Utils;
 import uk.ac.imperial.lsds.seepmaster.comm.MasterWorkerAPIImplementation;
 import uk.ac.imperial.lsds.seepmaster.comm.MasterWorkerCommManager;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.InfrastructureManager;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.InfrastructureManagerFactory;
+import uk.ac.imperial.lsds.seepmaster.infrastructure.master.api.RestAPIMaster;
 import uk.ac.imperial.lsds.seepmaster.query.GenericQueryManager;
 import uk.ac.imperial.lsds.seepmaster.query.InvalidLifecycleStatusException;
 import uk.ac.imperial.lsds.seepmaster.ui.UI;
@@ -46,7 +48,9 @@ public class Main {
 		MasterWorkerAPIImplementation api = new MasterWorkerAPIImplementation(qm, inf);
 		MasterWorkerCommManager mwcm = new MasterWorkerCommManager(port, api);
 		mwcm.start();
-		
+
+		boolean enableRestAPI = mc.getString(MasterConfig.REST_API_ENABLED).equals("true");
+
 		int uiType = mc.getInt(MasterConfig.UI_TYPE);
 		UI ui = UIFactory.createUI(uiType, qm, inf);
 		LOG.info("Created UI of type: {}", UIFactory.nameUIOfType(uiType));
@@ -62,11 +66,16 @@ public class Main {
 			baseClass = mc.getString(MasterConfig.BASECLASS_NAME);
 			composeMethod = mc.getString(MasterConfig.COMPOSE_METHOD_NAME);
 			LOG.info("Loading query {} with baseClass: {} from file...", queryPathFile, baseClass);
-			boolean success = qm.loadQueryFromFile(queryType, queryPathFile, baseClass, queryArgs, composeMethod);
+			boolean success = qm.loadQueryFromFile(queryType, queryPathFile, baseClass, queryArgs, composeMethod, enableRestAPI);
 			if(! success){
 				throw new InvalidLifecycleStatusException("Could not load query due to attempt to violate app lifecycle");
 			}
 			LOG.info("Loading query...OK");
+		}
+
+		if (enableRestAPI) {
+			RestAPIMaster.RestAPIMasterManager.getInstance().addToRegistry("/queryplan", new RestAPIQueryManager(qm));
+			RestAPIMaster.RestAPIMasterManager.getInstance().startServer(mc.getInt(MasterConfig.REST_API_MASTER_PORT));
 		}
 		
 		ui.start();

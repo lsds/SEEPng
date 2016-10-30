@@ -46,11 +46,20 @@ public class ScheduleDescription {
 	}
 	
 	// Convenience methods. These are copied from other places in general.
-	
+
 	public LogicalOperator getOperatorWithId(int opId){
 		for(LogicalOperator lo : ops){
 			if(lo.getOperatorId() == opId)
 				return lo;
+		}
+		return null;
+	}
+
+	public Stage getStageOfOperatorId(int opId){
+		for (Stage s: stages) {
+			if (s.getWrappedOperators().contains(opId)) {
+				return s;
+			}
 		}
 		return null;
 	}

@@ -108,7 +108,7 @@ public class WebUIHandler extends HttpServlet {
 		    }
 		}
 		short queryType = 0; // FIXME: allow to specify query type here as well
-		return qm.loadQueryFromFile(queryType, pathToJar, definitionClass, new String[]{}, "compose");
+		return qm.loadQueryFromFile(queryType, pathToJar, definitionClass, new String[]{}, "compose", true);
 	}
 	
 	private String processUploadedFile(FileItem item){

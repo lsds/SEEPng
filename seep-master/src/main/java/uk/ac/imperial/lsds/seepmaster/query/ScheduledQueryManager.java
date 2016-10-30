@@ -1,23 +1,15 @@
 package uk.ac.imperial.lsds.seepmaster.query;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.esotericsoftware.kryo.Kryo;
-
 import uk.ac.imperial.lsds.seep.api.DataReference;
+import uk.ac.imperial.lsds.seep.api.QueryExecutionMode;
 import uk.ac.imperial.lsds.seep.api.RuntimeEvent;
 import uk.ac.imperial.lsds.seep.api.SeepChooseTask;
-import uk.ac.imperial.lsds.seep.api.operator.DownstreamConnection;
-import uk.ac.imperial.lsds.seep.api.operator.Operator;
-import uk.ac.imperial.lsds.seep.api.operator.SeepLogicalOperator;
-import uk.ac.imperial.lsds.seep.api.operator.SeepLogicalQuery;
-import uk.ac.imperial.lsds.seep.api.operator.UpstreamConnection;
+import uk.ac.imperial.lsds.seep.api.operator.*;
 import uk.ac.imperial.lsds.seep.api.operator.sinks.MarkerSink;
 import uk.ac.imperial.lsds.seep.api.operator.sinks.Sink;
 import uk.ac.imperial.lsds.seep.api.operator.sources.Source;
@@ -28,9 +20,11 @@ import uk.ac.imperial.lsds.seep.comm.protocol.ProtocolCommandFactory;
 import uk.ac.imperial.lsds.seep.comm.protocol.SeepCommand;
 import uk.ac.imperial.lsds.seep.comm.protocol.StageStatusCommand;
 import uk.ac.imperial.lsds.seep.comm.serialization.KryoFactory;
-import uk.ac.imperial.lsds.seep.core.DatasetMetadata;
 import uk.ac.imperial.lsds.seep.core.DatasetMetadataPackage;
 import uk.ac.imperial.lsds.seep.errors.NotImplementedException;
+import uk.ac.imperial.lsds.seep.infrastructure.ControlEndPoint;
+import uk.ac.imperial.lsds.seep.infrastructure.SeepEndPoint;
+import uk.ac.imperial.lsds.seep.infrastructure.api.RestAPINodeDescription;
 import uk.ac.imperial.lsds.seep.scheduler.ScheduleDescription;
 import uk.ac.imperial.lsds.seep.scheduler.Stage;
 import uk.ac.imperial.lsds.seep.scheduler.StageType;
@@ -39,12 +33,14 @@ import uk.ac.imperial.lsds.seepmaster.LifecycleManager;
 import uk.ac.imperial.lsds.seepmaster.MasterConfig;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.ExecutionUnit;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.InfrastructureManager;
+import uk.ac.imperial.lsds.seepmaster.infrastructure.master.api.RestAPINodeManager;
 import uk.ac.imperial.lsds.seepmaster.scheduler.ScheduleManager;
 import uk.ac.imperial.lsds.seepmaster.scheduler.ScheduleTracker;
 import uk.ac.imperial.lsds.seepmaster.scheduler.SchedulerEngineWorker;
 import uk.ac.imperial.lsds.seepmaster.scheduler.loadbalancing.LoadBalancingStrategyType;
-import uk.ac.imperial.lsds.seepmaster.scheduler.memorymanagement.MemoryManagementPolicyType;
 import uk.ac.imperial.lsds.seepmaster.scheduler.schedulingstrategy.SchedulingStrategyType;
+
+import com.esotericsoftware.kryo.Kryo;
 
 public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 
@@ -68,6 +64,10 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 	private ScheduleDescription scheduleDescription;
 	private Thread worker;
 	private SchedulerEngineWorker seWorker;
+
+	private boolean enableRestAPI;
+	private SeepLogicalQuery logicalQuery;
+	private Map<Integer, RestAPINodeManager> opToNodeInformationMapping;
 	
 	private ScheduledQueryManager(InfrastructureManager inf, Comm comm, LifecycleManager lifeManager, MasterConfig mc, short queryType){
 		this.mc = mc;
@@ -76,6 +76,8 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 		this.lifeManager = lifeManager;
 		this.k = KryoFactory.buildKryoForProtocolCommands(this.getClass().getClassLoader());
 		this.queryType = queryType;
+		this.enableRestAPI = false;
+		this.opToNodeInformationMapping = null;
 	}
 	
 	public static ScheduledQueryManager getInstance(InfrastructureManager inf, Comm comm, 
@@ -98,6 +100,7 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 			LOG.error("Attempt to violate application lifecycle");
 			return false;
 		}
+		this.logicalQuery = slq;
 		this.pathToQueryJar = pathToQueryJar;
 		this.definitionClassName = definitionClass;
 		this.queryArgs = queryArgs;
@@ -143,7 +146,7 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 	}
 	
 	@Override
-	public boolean loadQueryFromFile(short queryType, String pathToQueryJar, String definitionClass, String[] queryArgs, String composeMethod) {
+	public boolean loadQueryFromFile(short queryType, String pathToQueryJar, String definitionClass, String[] queryArgs, String composeMethod, boolean enable_rest_api) {
 		throw new NotImplementedException("ScheduledQueryManager.loadQueryFromFile not implemented !!");
 	}
 
@@ -177,6 +180,10 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 		// Get the input info for the first stages
 		seWorker.prepareForStart(connections);
 		LOG.info("Prepare scheduler engine...OK");
+
+		if (enableRestAPI) {
+			this.opToNodeInformationMapping = createOperatorDescriptionServers();
+		}
 		
 		lifeManager.tryTransitTo(LifecycleManager.AppStatus.QUERY_DEPLOYED);
 		return true;
@@ -201,6 +208,72 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 		return true;
 	}
 
+	@Override
+	public Map<String, Object> extractQueryOperatorsInformation() {
+		Map<String, Object> nDetails = new HashMap<>();
+
+
+		Map<String, Object> qpInformation = new HashMap<String, Object>();
+
+		List<Object> nodes = new ArrayList<Object>();
+		List<Object> edges = new ArrayList<Object>();
+
+		for (LogicalOperator lo : logicalQuery.getSources()) {
+			nodes.add(process_node_lo_information(lo, "graph_type_source"));
+			edges.addAll(process_edges_lo_information(lo));
+		}
+
+		for (LogicalOperator lo : logicalQuery.getAllOperators()) {
+			nodes.add(process_node_lo_information(lo, "graph_type_query"));
+			edges.addAll(process_edges_lo_information(lo));
+		}
+
+		LogicalOperator sink = logicalQuery.getSink();
+		nodes.add(process_node_lo_information(sink, "graph_type_sink"));
+		edges.addAll(process_edges_lo_information(sink));
+
+		qpInformation.put("nodes", nodes);
+		qpInformation.put("edges", edges);
+
+		return nDetails;
+	}
+
+	private Map<String, Object> process_node_lo_information(LogicalOperator lo, String type) {
+		Map<String, Object> nDetails = new HashMap<>();
+
+		nDetails.put("id", "" + lo.getOperatorId());
+		nDetails.put("type", "graph_type_query");
+
+		//if (c.getOpContext().getOperatorStaticInformation() != null) {
+		//    nDetails.put("ip", c.getOpContext().getOperatorStaticInformation().getMyNode().getIp());
+		//    nDetails.put("port", c.getOpContext().getOperatorStaticInformation().getMyNode().getPort());
+		//}
+
+		Map<String, Object> nData = new HashMap<String, Object>();
+		nData.put("data", nDetails);
+
+		return nData;
+	}
+
+	private List<Object> process_edges_lo_information(LogicalOperator lo) {
+		List<Object> edges = new ArrayList<Object>();
+
+		Iterator<DownstreamConnection> iter = lo.downstreamConnections().iterator();
+		while (iter.hasNext()) {
+			DownstreamConnection dc = iter.next();
+			Map<String, Object> eDetails = new HashMap<>();
+			eDetails.put("streamid", lo.getOperatorId() + "-" + dc.getStreamId());
+			eDetails.put("source", "" + lo.getOperatorId());
+			eDetails.put("target", "" + dc.getDownstreamOperator().getOperatorId());
+			eDetails.put("type", "graph_edge_defaults");
+			Map<String, Object> eData = new HashMap<String, Object>();
+			eData.put("data", eDetails);
+			edges.add(eData);
+		}
+
+		return edges;
+	}
+
 	// FIXME: this code is repeated in materialisedQueryManager. please refactor
 	// FIXME: in particular, consider moving this to MasterWorkerAPIImplementation (that already handles a comm and k)
 	private void sendQueryToNodes(short queryType, Set<Connection> connections, String definitionClassName, String[] queryArgs, String composeMethodName) {
@@ -211,7 +284,7 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 		comm.send_object_sync(code, connections, k);
 		LOG.info("Sending query file...DONE!");
 	}
-	
+
 	private boolean sendScheduleToNodes(Set<Connection> connections){
 		LOG.info("Sending Schedule Deploy Command");
 		// Send physical query to all nodes
@@ -387,6 +460,36 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 			return true;
 		}
 		return false;
+	}
+
+	public void setEnableRestAPI (boolean enableRestAPI_opt) {
+		this.enableRestAPI = enableRestAPI_opt;
+	}
+
+
+
+	public Map<Integer, RestAPINodeManager> createOperatorDescriptionServers () {
+		Map<Integer, RestAPINodeManager> mapping = new HashMap<>();
+
+		for(LogicalOperator lso : logicalQuery.getAllOperators()){
+			int opId = lso.getOperatorId();
+			Stage stage = scheduleDescription.getStageOfOperatorId(opId);
+
+			Set<SeepEndPoint> all_end_points = stage.getInvolvedNodes();
+			Iterator itr = all_end_points.iterator();
+
+			while(itr.hasNext()) {
+				SeepEndPoint endPointInfo = (SeepEndPoint) itr.next();
+
+				RestAPINodeManager currentNodeDescription = new RestAPINodeManager();
+				currentNodeDescription.addToRegistry("/nodedescription",  new RestAPINodeDescription(endPointInfo));
+				currentNodeDescription.startServer(endPointInfo.getPort() + 1000);
+
+				mapping.put(opId, currentNodeDescription);
+			}
+		}
+
+		return mapping;
 	}
 	
 	/** Implement ScheduleManager interface **/

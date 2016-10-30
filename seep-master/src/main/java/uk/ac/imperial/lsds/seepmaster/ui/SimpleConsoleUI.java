@@ -90,7 +90,7 @@ public class SimpleConsoleUI implements UI {
 					// FIXME: get rid of harcoded name
 					composeMethod = "compose";
 					
-					allowed = qm.loadQueryFromFile(queryType, pathToJar, definitionClass, queryArgs, composeMethod);
+					allowed = qm.loadQueryFromFile(queryType, pathToJar, definitionClass, queryArgs, composeMethod, true);
 					if(!allowed){
 						LOG.warn("Could not load query");
 						break;
