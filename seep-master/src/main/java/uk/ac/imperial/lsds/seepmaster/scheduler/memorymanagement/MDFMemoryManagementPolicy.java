@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.imperial.lsds.seep.api.DataReference;
 import uk.ac.imperial.lsds.seep.core.DatasetMetadata;
 import uk.ac.imperial.lsds.seep.core.DatasetMetadataPackage;
 import uk.ac.imperial.lsds.seep.scheduler.ScheduleDescription;
@@ -35,6 +36,7 @@ public class MDFMemoryManagementPolicy implements MemoryManagementPolicy {
 	
 	private Map<Integer, Integer> dataset_access_count = new HashMap<>();
 	private Map<Integer, Integer> dataset_expected_count = new HashMap<>();
+	private Map<Integer, Boolean> datasets_all_in_mem = new HashMap<>();
 	
 	// Metrics
 	private long __totalUpdateTime = 0;
@@ -172,8 +174,13 @@ public class MDFMemoryManagementPolicy implements MemoryManagementPolicy {
 		double r = 0;
 		long mem = 0;
 		for(DatasetMetadata dm : datasetsMetadata) {
+			if ( !datasets_all_in_mem.containsKey(dm.getDatasetId()) ) {
+				datasets_all_in_mem.put(dm.getDatasetId(), true);
+			}
 			if(dm.isInMem()) {
 				mem = mem + dm.getSize();
+			} else {
+				datasets_all_in_mem.replace(dm.getDatasetId(), false);
 			}
 		}
 		sizeOfThisDataset++;
@@ -251,6 +258,13 @@ public class MDFMemoryManagementPolicy implements MemoryManagementPolicy {
 	@Override
 	public long __totalRankTime() {
 		return this.__totalRankTime;
+	}
+	
+	public boolean datasetIsAllInMem (DataReference ref) {
+		if (datasets_all_in_mem.containsKey(ref.getId())) {
+			return datasets_all_in_mem.get(ref.getId());
+		}
+		return true;
 	}
 
 }

@@ -6,7 +6,8 @@ public enum SchedulingStrategyType {
 	SEQUENTIAL((short)0, new SequentialSchedulingStrategy()),
 	RANDOM((short)1, new RandomSchedulingStrategy()),
 	PARALLEL_LOCALITY((short)2, new ParallelLocalitySchedulingStrategy()),
-	MDF((short)3, new MDFSchedulingStrategy());
+	MDF((short)3, new MDFSchedulingStrategy()),
+	MEMAWARE((short)4, new MemAwareSchedulingStrategy());
 	
 	private int type;
 	private SchedulingStrategy strategy;

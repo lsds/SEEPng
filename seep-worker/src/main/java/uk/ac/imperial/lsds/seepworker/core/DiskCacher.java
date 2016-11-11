@@ -130,7 +130,7 @@ public class DiskCacher {
 			bos.write(payload, 0, payload.length);
 		}
 		bos.flush();
-		fos.getFD().sync();
+		//fos.getFD().sync();
 		bos.close();
 		fos.close();
 		data.setCachedLocation(cacheFileName);

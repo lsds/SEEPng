@@ -117,6 +117,7 @@ public class Conductor {
 		Map<Integer, ConnectionType> connTypeInformation = getInputConnectionType(o);
 		coreInput = CoreInputFactory.buildCoreInputFor(wc, drm, input, connTypeInformation);
 		coreOutput = CoreOutputFactory.buildCoreOutputFor(wc, drm, output);
+		drm.addToIOMap(inputs.get(o.getOperatorId()), outputs.get(o.getOperatorId()));
 		
 		// Specialized data selectors
 		dataStoreSelectors = DataStoreSelectorFactory.buildDataStoreSelector(coreInput, 

@@ -47,6 +47,7 @@ public class DataReferenceManager {
 	private Map<Integer, DataReference> catalogue;
 	private Map<Integer, Dataset> datasets;
 	private List<DataStoreSelector> dataStoreSelectors;
+	private Map<Integer, Set<Integer>> IODependencyMap = new HashMap<Integer, Set<Integer>>();
 	
 	/**
 	 * This list keeps datasets ordered by priority of staying in memory. Such order 
@@ -377,7 +378,12 @@ public class DataReferenceManager {
 					// We find the first dataset in the list that is in memory and send it to disk
 					// TODO: is one enough? how to know?
 					if(this.datasetIsInMem(i)) {
-						freedMemory = sendDatasetToDisk(i);
+						if (datasetId != null && IODependencyMap.containsKey(datasetId) &&
+								IODependencyMap.get(datasetId).contains(i)) {
+							freedMemory = sendDatasetToDisk(datasetId);
+						} else {
+							freedMemory = sendDatasetToDisk(i);
+						}
 						if (freedMemory > 0) {
 							return freedMemory;
 						}
@@ -399,6 +405,24 @@ public class DataReferenceManager {
 	public void printCatalogue() {
 		for(Entry<Integer, DataReference> entry : catalogue.entrySet()) {
 			System.out.println("id: " + entry.getKey()+ " val: " + entry.getValue().getPartitionId());
+		}
+	}
+	
+	public void addToIOMap(
+			Map<Integer, Set<DataReference>> inputs, 
+			Map<Integer, Set<DataReference>> outputs) {
+		for (Entry<Integer, Set<DataReference>> stage : outputs.entrySet()) {
+			for (DataReference output : stage.getValue()) {
+				if (!IODependencyMap.containsKey(output.getId())) {
+					Set <Integer> inputIds = new HashSet<Integer>();
+					for (DataReference input : inputs.get(stage.getKey())) {
+						inputIds.add(input.getId());
+					}
+						IODependencyMap.put(output.getId(), inputIds);
+				} else {
+					//IODependencyMap.get(output.getId()).addAll(inputIds);
+				}
+			}
 		}
 	}
 	
