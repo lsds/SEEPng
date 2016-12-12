@@ -49,6 +49,9 @@ public class DataReferenceManager {
 	private List<DataStoreSelector> dataStoreSelectors;
 	private Map<Integer, Set<Integer>> IODependencyMap = new HashMap<Integer, Set<Integer>>();
 	
+	private Set<DatasetMetadata> deletedDatasets = new HashSet<DatasetMetadata>();
+	private Set<Integer> deletedDatasetList = new HashSet<Integer>();
+	
 	/**
 	 * This list keeps datasets ordered by priority of staying in memory. Such order 
 	 * is determined by the master and used by DRM to choose which datasets to evict to disk
@@ -124,6 +127,16 @@ public class DataReferenceManager {
 			LOG.info("Dataset {} ranked {}, is in mem? {}", rankedDatasets.get(index), index, datasetIsInMem(rankedDatasets.get(index)));
 		}
 		for(Integer tr : toRemove){
+			/*
+			Dataset d = datasets.get(tr);
+			long size = d.size();
+			boolean inMem = datasetIsInMem(tr);
+			long estimatedCreationCost = d.creationCost();
+			long diskAccess = d.getDiskAccess();
+			long memAccess = d.getMemAccess();
+			DatasetMetadata removedset = new DatasetMetadata(tr, size, inMem, estimatedCreationCost, diskAccess, memAccess);
+			deletedDatasets.add(removedset);
+			deletedDatasetList.add(tr);*/
 			datasets.remove(tr);
 			catalogue.remove(tr);
 		}
@@ -142,11 +155,11 @@ public class DataReferenceManager {
 			long size = d.size();
 			boolean inMem = datasetIsInMem(id);
 			long estimatedCreationCost = d.creationCost();
-			int diskAccess = d.getDiskAccess();
+			long diskAccess = d.getDiskAccess();
 			if(diskAccess != 0) {
 				System.out.println();
 			}
-			int memAccess = d.getMemAccess();
+			long memAccess = d.getMemAccess();
 			DatasetMetadata dm = new DatasetMetadata(id, size, inMem, estimatedCreationCost, diskAccess, memAccess);
 			// Classify then as old (non used by this stage) and new (used by this stage)
 			if(rankedDatasets.contains(id)) {
@@ -159,6 +172,7 @@ public class DataReferenceManager {
 			if(usedSet.contains(id)) {
 				usedDatasets.add(dm);
 			}
+			oldDatasets.addAll(deletedDatasets);
 		}
 		double availableMemory = bufferPool.getPercAvailableMemory();
 		DatasetMetadataPackage dmp = new DatasetMetadataPackage(oldDatasets, newDatasets, usedDatasets, availableMemory, __time_freeDatasets);
@@ -282,6 +296,9 @@ public class DataReferenceManager {
 	}
 	
 	public boolean datasetIsInMem(int datasetId) {
+		if (deletedDatasetList.contains(datasetId)) {
+			return false;
+		}
 		return cacher.inMem(datasets.get(datasetId));
 	}
 

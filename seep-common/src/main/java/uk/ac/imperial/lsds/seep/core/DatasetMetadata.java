@@ -6,12 +6,12 @@ public class DatasetMetadata {
 	private long size;
 	private boolean inMem;
 	private long creationCost;
-	private int diskAccess;
-	private int memAccess;
+	private long diskAccess;
+	private long memAccess;
 	
 	public DatasetMetadata() { }
 	
-	public DatasetMetadata(int datasetId, long size, boolean inMem, long creationCost, int diskAccess, int memAccess) {
+	public DatasetMetadata(int datasetId, long size, boolean inMem, long creationCost, long diskAccess, long memAccess) {
 		this.datasetId = datasetId;
 		this.size = size;
 		this.inMem = inMem;
@@ -36,11 +36,11 @@ public class DatasetMetadata {
 		return creationCost;
 	}
 	
-	public int getDiskAccess() {
+	public long getDiskAccess() {
 		return diskAccess;
 	}
 	
-	public int getMemAccess() {
+	public long getMemAccess() {
 		return memAccess;
 	}
 	

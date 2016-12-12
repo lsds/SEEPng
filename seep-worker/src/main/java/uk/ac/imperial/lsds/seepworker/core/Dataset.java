@@ -49,8 +49,8 @@ public class Dataset implements IBuffer, OBuffer {
 	private String cacheFileName = "";
 	private long cacheFilePosition = 0;
 	
-	private int diskAccess;
-	private int memAccess;
+	private long diskAccess = 0;
+	private long memAccess = 0;
 	
 	private byte[] readInt = new byte[Integer.BYTES];
 	
@@ -228,11 +228,11 @@ public class Dataset implements IBuffer, OBuffer {
 		}
 	}
 	
-	public int getDiskAccess() {
+	public long getDiskAccess() {
 		return diskAccess;
 	}
 	
-	public int getMemAccess() {
+	public long getMemAccess() {
 		return memAccess;
 	}
 	
@@ -323,19 +323,21 @@ public class Dataset implements IBuffer, OBuffer {
 		if(rPtrToBuffer == null || rPtrToBuffer.remaining() == 0) {
 			// MEMORY
 			if (cacheFileName.equals("")) {
-				memAccess++;
 				if(readerIterator == null) {
 					readerIterator = this.buffers.iterator();
 				}
 				if(readerIterator.hasNext()) {
+					//memAccess++;
 					rPtrToBuffer = readerIterator.next();
 					if(rPtrToBuffer.position() == rPtrToBuffer.limit()) {
 						rPtrToBuffer.flip();
 					}
+					memAccess+= rPtrToBuffer.remaining();
 				}
 				else {
 					// No more buffers available, read the write buffer
 					if(wPtrToBuffer != null) {
+						//memAccess++;
 						if(wPtrToBuffer.position() != 0) {
 							wPtrToBuffer.flip();
 						}
@@ -343,6 +345,7 @@ public class Dataset implements IBuffer, OBuffer {
 						if(rPtrToBuffer.limit() == 0) {
 							System.out.println("B");
 						}
+						memAccess+= rPtrToBuffer.remaining();
 						wPtrToBuffer = null;
 					}
 					else {
@@ -353,7 +356,6 @@ public class Dataset implements IBuffer, OBuffer {
 			}
 			// DISK
 			else {
-				diskAccess++;
 				FileInputStream is = null;
 				try {
 					is = new FileInputStream(cacheFileName);
@@ -363,6 +365,7 @@ public class Dataset implements IBuffer, OBuffer {
 					if(limit == -1 || size == 0) {
 						// if the write buffer still contains data
 						if(wPtrToBuffer != null) {
+							//memAccess++;
 							if(wPtrToBuffer.position() != 0) {
 								wPtrToBuffer.flip();
 							}
@@ -371,6 +374,7 @@ public class Dataset implements IBuffer, OBuffer {
 								System.out.println("D");
 							}
 							is.close();
+							memAccess+= rPtrToBuffer.remaining();
 							wPtrToBuffer = null;
 						}
 						else {
@@ -385,6 +389,7 @@ public class Dataset implements IBuffer, OBuffer {
 						if(read == -1) {
 							// if the write buffer still contains data
 							if(wPtrToBuffer != null) {
+								//memAccess++;
 								if(wPtrToBuffer.position() != 0) {
 									wPtrToBuffer.flip();
 								}
@@ -393,6 +398,7 @@ public class Dataset implements IBuffer, OBuffer {
 									System.out.println("F");
 								}
 								is.close();
+								memAccess+= rPtrToBuffer.remaining();
 								wPtrToBuffer = null;
 							}
 							else {
@@ -406,10 +412,12 @@ public class Dataset implements IBuffer, OBuffer {
 							System.exit(-1);
 						}
 						else {
+							//diskAccess++;
 							rPtrToBuffer = ByteBuffer.wrap(d);
 							if(rPtrToBuffer.limit() == 0) {
 								System.out.println("H");
 							}
+							diskAccess+= rPtrToBuffer.remaining();
 							cacheFilePosition = is.getChannel().position(); // 4 limit size
 							is.close();
 						}
@@ -417,6 +425,7 @@ public class Dataset implements IBuffer, OBuffer {
 				}
 				catch (FileNotFoundException fnfe) {
 					if(wPtrToBuffer != null) {
+						//memAccess++;
 						if(wPtrToBuffer.position() != 0) {
 							wPtrToBuffer.flip();
 						}
@@ -425,6 +434,7 @@ public class Dataset implements IBuffer, OBuffer {
 							System.out.println("I");
 						}
 						// no need to close stream as it does not exist
+						memAccess+= rPtrToBuffer.remaining();
 						wPtrToBuffer = null;
 					}
 					else {
@@ -452,19 +462,21 @@ public class Dataset implements IBuffer, OBuffer {
 		if(rPtrToBuffer == null || rPtrToBuffer.remaining() == 0) {
 			// MEMORY
 			if (cacheFileName.equals("")) {
-				memAccess++;
 				if(readerIterator == null) {
 					readerIterator = this.buffers.iterator();
 				}
 				if(readerIterator.hasNext()) {
+					//memAccess++;
 					rPtrToBuffer = readerIterator.next();
 					if(rPtrToBuffer.position() == rPtrToBuffer.limit()) {
 						rPtrToBuffer.flip();
 					}
+					memAccess+= rPtrToBuffer.remaining();
 				}
 				else {
 					// No more buffers available, read the write buffer
 					if(wPtrToBuffer != null) {
+						//memAccess++;
 						if(wPtrToBuffer.position() != 0) {
 							wPtrToBuffer.flip();
 						}
@@ -472,6 +484,7 @@ public class Dataset implements IBuffer, OBuffer {
 						if(rPtrToBuffer.limit() == 0) {
 							System.out.println("B");
 						}
+						memAccess+= rPtrToBuffer.remaining();
 						wPtrToBuffer = null;
 					}
 					else {
@@ -482,7 +495,6 @@ public class Dataset implements IBuffer, OBuffer {
 			}
 			// DISK
 			else {
-				diskAccess++;
 				FileInputStream is = null;
 				try {
 					is = new FileInputStream(cacheFileName);
@@ -492,6 +504,7 @@ public class Dataset implements IBuffer, OBuffer {
 					if(limit == -1 || size == 0) {
 						// if the write buffer still contains data
 						if(wPtrToBuffer != null) {
+							//memAccess++;
 							if(wPtrToBuffer.position() != 0) {
 								wPtrToBuffer.flip();
 							}
@@ -499,6 +512,7 @@ public class Dataset implements IBuffer, OBuffer {
 							if(rPtrToBuffer.limit() == 0) {
 								System.out.println("D");
 							}
+							memAccess+= rPtrToBuffer.remaining();
 							is.close();
 //							if(wPtrToBuffer.limit() == 0) return null;
 							wPtrToBuffer = null;
@@ -515,6 +529,7 @@ public class Dataset implements IBuffer, OBuffer {
 						if(read == -1) {
 							// if the write buffer still contains data
 							if(wPtrToBuffer != null) {
+								//memAccess++;
 								if(wPtrToBuffer.position() != 0) {
 									wPtrToBuffer.flip();
 								}
@@ -522,6 +537,7 @@ public class Dataset implements IBuffer, OBuffer {
 								if(rPtrToBuffer.limit() == 0) {
 									System.out.println("F");
 								}
+								memAccess+= rPtrToBuffer.remaining();
 								is.close();
 //								if(wPtrToBuffer.limit() == 0) return null;
 								wPtrToBuffer = null;
@@ -537,10 +553,12 @@ public class Dataset implements IBuffer, OBuffer {
 							System.exit(-1);
 						}
 						else {
+							//diskAccess++;
 							rPtrToBuffer = ByteBuffer.wrap(d);
 							if(rPtrToBuffer.limit() == 0) {
 								System.out.println("H");
 							}
+							diskAccess+= rPtrToBuffer.remaining();
 							cacheFilePosition = is.getChannel().position(); // 4 limit size
 							is.close();
 						}
@@ -548,6 +566,7 @@ public class Dataset implements IBuffer, OBuffer {
 				}
 				catch (FileNotFoundException fnfe) {
 					if(wPtrToBuffer != null) {
+						//memAccess++;
 						if(wPtrToBuffer.position() != 0) {
 							wPtrToBuffer.flip();
 						}
@@ -555,6 +574,7 @@ public class Dataset implements IBuffer, OBuffer {
 						if(rPtrToBuffer.limit() == 0) {
 							System.out.println("I");
 						}
+						memAccess+= rPtrToBuffer.remaining();
 						// no need to close stream as it does not exist
 //						if(wPtrToBuffer.limit() == 0) return null;
 						wPtrToBuffer = null;

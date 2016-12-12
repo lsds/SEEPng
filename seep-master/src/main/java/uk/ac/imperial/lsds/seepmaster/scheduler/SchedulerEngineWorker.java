@@ -92,8 +92,8 @@ public class SchedulerEngineWorker implements Runnable {
 				LOG.info("[END JOB] !!! {}", totalScheduleTime);
 				int totalDatasets = tracker.getClusterDatasetRegistry().totalDatasetsGeneratedDuringSchedule();
 				int totalSpilledDatasets = tracker.getClusterDatasetRegistry().totalDatasetsSpilledToDiskDuringSchedule();
-				double ratio = (double)totalSpilledDatasets/(double)totalDatasets;
-				double ratioMemory = (1 - ratio);
+				//double ratio = (double)totalSpilledDatasets/(double)totalDatasets;
+				//double ratioMemory = (1 - ratio);
 				int ratioMemVSDiskAccessedData = tracker.getClusterDatasetRegistry().percentageOfTotalDataAccessedFromMem();
 				String memUtilization = tracker.getClusterDatasetRegistry().getHistoricMemUtilization();
 				long totalUpdateTime = tracker.getClusterDatasetRegistry().getMMP().__totalUpdateTime();
@@ -106,7 +106,7 @@ public class SchedulerEngineWorker implements Runnable {
 				LOG.info("Total time post completion work: {}", this.__time_assignWork);
 				long freeingTime = tracker.getClusterDatasetRegistry().totalTimeFreeingDatasets();
 				LOG.info("Total time freeing datasets: {}", freeingTime);
-				LOG.info("Ratio hit/miss: {}", ratioMemory);
+				LOG.info("Ratio hit/miss: {}", tracker.getClusterDatasetRegistry().hitMiss());//ratioMemory);
 				LOG.info("Ratio memAccessedData/diskAccessedData: {}", ratioMemVSDiskAccessedData);
 				LOG.info("Historic mem utilization: {}", memUtilization);
 				work = false;

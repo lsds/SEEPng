@@ -76,7 +76,8 @@ public class MDFMemoryManagementPolicy implements MemoryManagementPolicy {
 		stageid_ratio_inmem.put(stageId, percDataInMem);
 		
 		for (DatasetMetadata dm : datasetsMetadata.usedDatasets) {
-			if (dataset_access_count.containsKey(dm.getDatasetId())) {
+			if (dataset_access_count.containsKey(dm.getDatasetId()) &&
+					dataset_expected_count.containsKey(dm.getDatasetId())) {
 				double decrement = dataset_expected_count.get(dm.getDatasetId()) - dataset_access_count.get(dm.getDatasetId());
 				decrement = (decrement-1.)/decrement;
 				if (euId_mdf.get(euId).containsKey(dm.getDatasetId())) {
@@ -194,7 +195,8 @@ public class MDFMemoryManagementPolicy implements MemoryManagementPolicy {
 		
 		// Check those datasets that must be evicted
 		for(Integer e : dataset_access_count.keySet()) {
-			if (dataset_access_count.get(e) >= dataset_expected_count.get(e)) {
+			if (dataset_expected_count.containsKey(e) &&
+					dataset_access_count.get(e) >= dataset_expected_count.get(e)) {
 				toEvict.add(e);
 			}
 		}

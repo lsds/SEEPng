@@ -35,6 +35,8 @@ public class ClusterDatasetRegistry {
 	
 	private Map<Integer, Long> dataset_diskAccessedData = new HashMap<>();
 	private Map<Integer, Long> dataset_memAccessedData = new HashMap<>();
+	private Map<Integer, Long> dataset_pagesdiskAccessedData = new HashMap<>();
+	private Map<Integer, Long> dataset_pagesmemAccessedData = new HashMap<>();
 	private List<Double> avMemoryHistoric = new ArrayList<>();
 	
 	public MemoryManagementPolicy getMMP() {
@@ -151,18 +153,32 @@ public class ClusterDatasetRegistry {
 	
 	private void updateMetrics(Set<DatasetMetadata> all) {
 		for(DatasetMetadata dm : all) {
-			int diskAccess = dm.getDiskAccess();
-			int memAccess = dm.getMemAccess();
+			long diskAccess = dm.getDiskAccess();
+			long memAccess = dm.getMemAccess();
 			long datasetSize = dm.getSize();
 			long totalDataAccessedFromDisk = diskAccess * datasetSize;
 			long totalDataAccessedFromMem = memAccess * datasetSize;
 			this.dataset_diskAccessedData.put(dm.getDatasetId(), totalDataAccessedFromDisk);
-			this.dataset_memAccessedData.put(dm.getDatasetId(), totalDataAccessedFromMem); // Update alwayw with latest results
+			this.dataset_memAccessedData.put(dm.getDatasetId(), totalDataAccessedFromMem);
+			this.dataset_pagesdiskAccessedData.put(dm.getDatasetId(), new Long(diskAccess));
+			this.dataset_pagesmemAccessedData.put(dm.getDatasetId(), new Long(memAccess)); // Update alwayw with latest results
 			totalDatasetsGenerated++;
 			if(! dm.isInMem()) {
 				totalDatasetsSpilledToDisk++;
 			}
 		}
+	}
+	
+	public double hitMiss() {
+		long diskaccess = 0, memaccess = 0;
+		for (Long daccesses : dataset_pagesdiskAccessedData.values()) {
+			diskaccess += daccesses;
+		}
+		for (Long maccesses : dataset_pagesmemAccessedData.values()) {
+			memaccess += maccesses;
+		}
+		System.out.println("HIT/MISS CALC" + memaccess + " : " + diskaccess);
+		return ((double)memaccess)/((double)(memaccess + diskaccess));
 	}
 	
 }

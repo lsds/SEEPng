@@ -92,10 +92,12 @@ public class MemAwareSchedulingStrategy implements SchedulingStrategy {
 			for(Stage upstream : head.getDependencies()) {
 				if(! tracker.isStageFinished(upstream)) {
 					holder = nextStageToSchedule(upstream, tracker);
-					inMemHold = isInMem(tracker, holder);
-					if (toReturn == null || inMemHold || inMemHold == inMemRet) {
-						toReturn = holder;
-						inMemRet = inMemHold;
+					if (tracker.isStageReady(holder)) {
+						inMemHold = isInMem(tracker, holder);
+						if (toReturn == null || inMemHold || inMemHold == inMemRet) {
+							toReturn = holder;
+							inMemRet = inMemHold;
+						}
 					}
 				}
 			}
