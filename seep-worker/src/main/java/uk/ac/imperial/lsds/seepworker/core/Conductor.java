@@ -117,7 +117,7 @@ public class Conductor {
 		Map<Integer, ConnectionType> connTypeInformation = getInputConnectionType(o);
 		coreInput = CoreInputFactory.buildCoreInputFor(wc, drm, input, connTypeInformation);
 		coreOutput = CoreOutputFactory.buildCoreOutputFor(wc, drm, output);
-		drm.addToIOMap(inputs.get(o.getOperatorId()), outputs.get(o.getOperatorId()));
+		//drm.addToIOMap(inputs.get(o.getOperatorId()), outputs.get(o.getOperatorId()));
 		
 		// Specialized data selectors
 		dataStoreSelectors = DataStoreSelectorFactory.buildDataStoreSelector(coreInput, 
@@ -222,17 +222,22 @@ public class Conductor {
 
 		SeepState state = null;
 		
+		Set<Integer> straightin = new HashSet<Integer>();
 		for(Set<DataReference> inputdrset : input.values()) {
 			for (DataReference inputdr : inputdrset) {
 				LOG.info("Stage {} input Dataset {}", stageId, inputdr.getId());
+				straightin.add(inputdr.getId());
 			}
 		}
-		
+
+		Set<Integer> straightout = new HashSet<Integer>();
 		for(Set<DataReference> outputdrset : output.values()) {
 			for (DataReference outputdr : outputdrset) {
 				LOG.info("Stage {} output Dataset {}", stageId, outputdr.getId());
+				straightout.add(outputdr.getId());
 			}
 		}
+		drm.addToIOMap(straightin, straightout);
 		
 		// probably pass to the callback here all info to talk with master
 		ProcessingEngine engine = ProcessingEngineFactory.buildComposedTaskProcessingEngine(wc, 

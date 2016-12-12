@@ -379,9 +379,11 @@ public class DataReferenceManager {
 					// TODO: is one enough? how to know?
 					if(this.datasetIsInMem(i)) {
 						if (datasetId != null && IODependencyMap.containsKey(datasetId) &&
-								IODependencyMap.get(datasetId).contains(i)) {
+								IODependencyMap.get(datasetId).contains(i) && this.datasetIsInMem(datasetId)) {
+							//System.out.println("Kicking " +  datasetId + " instead of " + i);
 							freedMemory = sendDatasetToDisk(datasetId);
 						} else {
+							//System.out.println("Kicking " + i);
 							freedMemory = sendDatasetToDisk(i);
 						}
 						if (freedMemory > 0) {
@@ -409,19 +411,17 @@ public class DataReferenceManager {
 	}
 	
 	public void addToIOMap(
-			Map<Integer, Set<DataReference>> inputs, 
-			Map<Integer, Set<DataReference>> outputs) {
-		for (Entry<Integer, Set<DataReference>> stage : outputs.entrySet()) {
-			for (DataReference output : stage.getValue()) {
-				if (!IODependencyMap.containsKey(output.getId())) {
-					Set <Integer> inputIds = new HashSet<Integer>();
-					for (DataReference input : inputs.get(stage.getKey())) {
-						inputIds.add(input.getId());
-					}
-						IODependencyMap.put(output.getId(), inputIds);
-				} else {
-					//IODependencyMap.get(output.getId()).addAll(inputIds);
-				}
+			Set<Integer> inputs, 
+			Set<Integer> outputs) {
+		for (Integer output : outputs) {
+			Set <Integer> inputIds = new HashSet<Integer>();
+			for (Integer input : inputs) {
+				inputIds.add(input);
+			}
+			if (!IODependencyMap.containsKey(output)) {
+				IODependencyMap.put(output, inputIds);
+			} else {
+				IODependencyMap.get(output).addAll(inputIds);
 			}
 		}
 	}

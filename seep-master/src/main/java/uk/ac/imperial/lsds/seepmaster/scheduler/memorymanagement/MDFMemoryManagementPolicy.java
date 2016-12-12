@@ -246,7 +246,7 @@ public class MDFMemoryManagementPolicy implements MemoryManagementPolicy {
 		Map<Integer, Double> result = new LinkedHashMap<>();
 		Stream <Entry<Integer, Double>> st = map.entrySet().stream();
 		// FIXME: precedence means that higher should be higher in ranked values. Probably need to multiply * -1 down there, or invert the order
-		st.sorted(Comparator.comparingDouble(e -> e.getValue())).forEachOrdered(e -> result.put(e.getKey(),e.getValue()));
+		st.sorted(Comparator.comparingDouble(e -> (-1*e.getValue()))).forEachOrdered(e -> result.put(e.getKey(),e.getValue()));
 		return result;
 	}
 
