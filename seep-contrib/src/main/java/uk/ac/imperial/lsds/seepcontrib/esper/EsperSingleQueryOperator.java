@@ -2,6 +2,7 @@ package uk.ac.imperial.lsds.seepcontrib.esper;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -71,12 +72,18 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	private API api = null;
 
+	public EsperSingleQueryOperator() {
+		
+	}
+
 	public EsperSingleQueryOperator(String query, String url, String name) {
 		this.esperQuery = query;
 		this.esperEngineURL = url;
 		this.name = name;
 		if (enableLoggingOfMatches) {
-			this.matchCache = Collections.synchronizedList(new ArrayList<Pair<Long,OTuple>>());
+			this.matchCache = new ArrayList<Pair<Long,OTuple>>();
+			//new LinkedList<Pair<Long,OTuple>>();
+			//this.matchCache = Collections.synchronizedList(new ArrayList<Pair<Long,OTuple>>());
 		}
 		this.initCache = new LinkedList<ITuple>();
 	}
