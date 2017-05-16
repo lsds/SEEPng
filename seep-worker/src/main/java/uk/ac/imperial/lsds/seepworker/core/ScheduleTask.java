@@ -130,6 +130,7 @@ public class ScheduleTask implements SeepTask {
 				Schema schema = nextOp.downstreamConnections().get(0).getSchema();
 				d = new TransporterITuple(schema);
 			}
+			if(o == null){return;}
 			Object[] values = o.getValues();
 			d.setValues(values);
 		}

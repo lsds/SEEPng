@@ -1,5 +1,6 @@
 package uk.ac.imperial.lsds.seep.api.data;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import uk.ac.imperial.lsds.seep.api.data.Schema;
@@ -27,8 +28,15 @@ public class CSVParser implements SchemaParser {
 	public byte[] bytesFromString(String textRecord) {
 		String[] parts = textRecord.split(",");
 		Type[] getTypes = schema.fields();
-		Object[] values = new Object[getTypes.length];
-		for(int index  = 0; index < getTypes.length; index++) {
+		int variableCount = 0;
+		for(int x = 0; x < getTypes.length; x++) {
+			Type t = getTypes[x];
+			if(t.equals(Type.STRING)){
+				variableCount++;
+			}
+		}
+		Object[] values = new Object[getTypes.length];// + variableCount];
+		for(int index = 0; index < parts.length; index++) {
 			Type t = getTypes[index];
 			if (t.equals(Type.BYTE)){
 				values[index] = new Byte(parts[index]);
@@ -43,6 +51,13 @@ public class CSVParser implements SchemaParser {
 				values[index] = new Long(parts[index]);
 			}
 			else if(t.equals(Type.STRING)){
+				//values[index] = new byte[parts[typeIndex].getBytes().length + Integer.BYTES];
+//				ByteBuffer bb = ByteBuffer.allocate(parts[index].getBytes().length + Integer.BYTES);
+//				bb.putInt(parts[index].getBytes().length);
+//				bb.put(parts[index].getBytes());
+//				values[index] = bb.array();
+//				values[index] = new Integer(parts[typeIndex].length());
+				//index++;
 				values[index] = parts[index];
 			}
 			else if(t.equals(Type.FLOAT)){
@@ -54,6 +69,10 @@ public class CSVParser implements SchemaParser {
 			else {
 				throw new SchemaException("Unknown type in schema");				
 			}
+		}
+		for(int index = 0; index < values.length; index++) {
+			Type t = getTypes[index];
+			values[index] = t.defaultValue();
 		}
 		return OTuple.create(schema, schema.names(), values);
 	}
