@@ -242,6 +242,9 @@ public class ITuple {
 		if(! schema.hasField(fieldName)){
 			throw new SchemaException("Current Schema does not have a field with name '"+fieldName+ "'");
 		}
+		if (!mapFieldToOffset.containsKey(fieldName)) {
+			this.populateOffsets();
+		}
 		int offset = mapFieldToOffset.get(fieldName);
 		wrapper.position(offset);
 		Object o = null;

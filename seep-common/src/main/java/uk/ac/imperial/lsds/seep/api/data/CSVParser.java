@@ -26,6 +26,7 @@ public class CSVParser implements SchemaParser {
 	}
 	
 	public byte[] bytesFromString(String textRecord) {
+		System.out.println("Processing: " + textRecord);
 		String[] parts = textRecord.split(",");
 		Type[] getTypes = schema.fields();
 		int variableCount = 0;
@@ -36,7 +37,8 @@ public class CSVParser implements SchemaParser {
 			}
 		}
 		Object[] values = new Object[getTypes.length];// + variableCount];
-		for(int index = 0; index < parts.length; index++) {
+		int index;
+		for(index = 0; index < parts.length; index++) {
 			Type t = getTypes[index];
 			if (t.equals(Type.BYTE)){
 				values[index] = new Byte(parts[index]);
@@ -70,7 +72,7 @@ public class CSVParser implements SchemaParser {
 				throw new SchemaException("Unknown type in schema");				
 			}
 		}
-		for(int index = 0; index < values.length; index++) {
+		for(; index < values.length; index++) {
 			Type t = getTypes[index];
 			values[index] = t.defaultValue();
 		}
