@@ -37,6 +37,9 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	public final static String STREAM_IDENTIFIER = "stream";
 
+	private static Integer gcount = new Integer(0);
+	private static Integer bcount = new Integer(0);
+
 	// This map contains a list of key,class mappings, which will be
 	// registered to the esper engine
 	private Map<String,Map<String, Object>> typesPerStream = new LinkedHashMap<String, Map<String,Object>>();
@@ -72,8 +75,7 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	private API api = null;
 
-	public EsperSingleQueryOperator() {
-		
+	public EsperSingleQueryOperator() {		
 	}
 
 	public EsperSingleQueryOperator(String query, String url, String name) {
@@ -182,21 +184,25 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	@Override
 	public void processData(ITuple data, API api) {
-		if (data == null || api == null) {
+		if (data == null || data.getData() == null || api == null) {
+			System.out.println("Bad tuple " + (++bcount));
 			return;
 		}
-		//log.debug("Received input tuple {}", data.toString());
-		//log.debug("Map of received input tuple {}", data.getSchema().toString());
-
-		if (!initialised) {
-			this.initCache.add(data);
-		}
-		else {
-			while (!this.initCache.isEmpty()) {
-				sendData(this.initCache.poll());
+//		synchronized (this.initCache) {
+			System.out.println("Good tuple " + (++gcount));
+			//log.debug("Received input tuple {}", data.toString());
+			//log.debug("Map of received input tuple {}", data.getSchema().toString());
+			if (!initialised) {
+				this.initCache.add(data);
+				setUp();
 			}
-			sendData(data);
-		}
+			else {
+				while (!this.initCache.isEmpty()) {
+					sendData(this.initCache.poll());
+				}
+				sendData(data);
+			}
+//		}
 	}
 
 	@Override
@@ -260,17 +266,27 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	public void sendData(ITuple input) {
 		String stream = input.getString(STREAM_IDENTIFIER);
+		/*if (stream.equals("string")) {
+			stream = "input";
+		}*/
 
 		Map<String, Object> item = new LinkedHashMap<String, Object>();
 
 		// only previously defined types are available to esper.
-		for (String key : this.typesPerStream.get(stream).keySet())
-			item.put(key, input.get(key));
+		//if (this.typesPerStream.containsKey(stream)) {
+			for (String key : this.typesPerStream.get(stream).keySet())
+				item.put(key, input.get(key));
+			
+			log.debug("Sending item {} with name '{}' to esper engine", item,
+					stream);
 
-		log.debug("Sending item {} with name '{}' to esper engine", item,
-				stream);
+			epService.getEPRuntime().sendEvent(item, stream);
+		/*} else {
+			System.out.println("ERROR: " + stream);
+			for (String key : this.typesPerStream.keySet())
+				System.out.println(key);
+		}*/
 
-		epService.getEPRuntime().sendEvent(item, stream);
 	}
 
 	public Map<String, Object> getTypes(String[] types) {

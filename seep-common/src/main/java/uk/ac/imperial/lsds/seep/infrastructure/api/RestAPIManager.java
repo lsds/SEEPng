@@ -3,6 +3,7 @@ package uk.ac.imperial.lsds.seep.infrastructure.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,5 +13,5 @@ public class RestAPIManager {
 
     final private Logger LOG = LoggerFactory.getLogger(RestAPIManager.class);
 
-    public static Map<String, RestAPIRegistryEntry> restAPIRegistry;
+    public static Map<String, RestAPIRegistryEntry> restAPIRegistry = new HashMap<String, RestAPIRegistryEntry>();
 }

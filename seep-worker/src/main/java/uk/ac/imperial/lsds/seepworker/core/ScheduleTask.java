@@ -116,27 +116,40 @@ public class ScheduleTask implements SeepTask {
 	
 	@Override
 	public void processData(ITuple data, API api) {
+		boolean taskProducedEmptyResult = false;
+		Schema lSchema = null;
+		byte[] o = null;
+		
 		for(int i = 0; i < tasks.size() - 1; i++) {
+			((SimpleCollector)scApi).reset();
 			SeepTask next = tasks.get(i);
 			next.processData(data, scApi);
-			OTuple o = ((SimpleCollector)scApi).collect();
+			o = ((SimpleCollector)scApi).collectMem();//((SimpleCollector)scApi).collect();
+			if(o == null) {
+				taskProducedEmptyResult = true;
+				break;
+			}
 			LogicalOperator nextOp = operators.get(i);
+			lSchema = nextOp.downstreamConnections().get(0).getSchema(); // 0 cause there's only 1
+			
+			/*
 			if(! sameSchema) {
-				Schema schema = nextOp.downstreamConnections().get(0).getSchema(); // 0 cause there's only 1
-				data = new ITuple(schema);
-				d = new TransporterITuple(schema); // FIXME: can we get schema from OTuple
+				data = new ITuple(lSchema);
+				d = new TransporterITuple(lSchema); // FIXME: can we get schema from OTuple
 			}
 			if(d == null) {
-				Schema schema = nextOp.downstreamConnections().get(0).getSchema();
-				d = new TransporterITuple(schema);
-			}
-			if(o == null){return;}
-			Object[] values = o.getValues();
-			d.setValues(values);
+				d = new TransporterITuple(lSchema);
+			}*/
+			
+			//Object[] values = o.getValues();
+			data = new TransporterITuple(lSchema);//, o); //d.setValues(values);
+			data.setData(o);
 		}
 		
-		SeepTask next = tasks.get(tasks.size() -1);
-		next.processData(data, api);
+		if (!taskProducedEmptyResult && tasks.size() > 1) {
+			SeepTask next = tasks.get(tasks.size() -1);
+			next.processData(data, api);
+		}
 		
 //		SeepTask next = taskIterator.next(); // Get first, and possibly only task here
 //		// Check whether there are tasks ahead
