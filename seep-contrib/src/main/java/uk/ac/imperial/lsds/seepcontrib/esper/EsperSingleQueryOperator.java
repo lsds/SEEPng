@@ -39,6 +39,7 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	private static Integer gcount = new Integer(0);
 	private static Integer bcount = new Integer(0);
+	private static Integer scount = new Integer(0);
 
 	// This map contains a list of key,class mappings, which will be
 	// registered to the esper engine
@@ -188,6 +189,7 @@ public class EsperSingleQueryOperator implements SeepTask {
 			System.out.println("Bad tuple " + (++bcount));
 			return;
 		}
+		this.api = api;
 //		synchronized (this.initCache) {
 			System.out.println("Good tuple " + (++gcount));
 			//log.debug("Received input tuple {}", data.toString());
@@ -221,16 +223,19 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 		//DataTuple output = new DataTuple(api.getDataMapper(), new TuplePayload());
 		List<Object> objects = new ArrayList<>();
-
+		
+		System.out.print("outtuple:");
 		for (String key : out.getEventType().getPropertyNames()) {
 			Object value = out.get(key);
 			if (value == null)
 				continue;
 			objects.add(value);
+			System.out.print(key + ":" + getType(value) + ":" + value + ",");
 			Schema.SchemaBuilder.getInstance().newField(getType(value), key);
-		}
+		} 
 
 		Schema schema = Schema.SchemaBuilder.getInstance().build();
+		System.out.println("  " + schema.schemaId());
 		OTuple outTuple = new OTuple(schema);
 		outTuple.setValues(objects.toArray());
 		Long otuple_payload_ts = System.currentTimeMillis();
@@ -261,7 +266,9 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 		log.debug("Match cache size: {}", this.matchCache.size());
 
-		api.send(OTuple.create(schema, out.getEventType().getPropertyNames(), objects.toArray()));;
+		System.out.println("Send tuple " + (++scount) + " ");
+		api.send(outTuple);
+//		api.send(OTuple.create(schema, out.getEventType().getPropertyNames(), objects.toArray()));;
 	}
 
 	public void sendData(ITuple input) {

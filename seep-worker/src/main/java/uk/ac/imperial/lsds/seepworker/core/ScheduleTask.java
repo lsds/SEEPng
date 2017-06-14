@@ -120,17 +120,20 @@ public class ScheduleTask implements SeepTask {
 		Schema lSchema = null;
 		byte[] o = null;
 		
-		for(int i = 0; i < tasks.size() - 1; i++) {
+		for(int i = 0; i < tasks.size() ; i++) {
 			((SimpleCollector)scApi).reset();
 			SeepTask next = tasks.get(i);
 			next.processData(data, scApi);
-			o = ((SimpleCollector)scApi).collectMem();//((SimpleCollector)scApi).collect();
-			if(o == null) {
+			if(((SimpleCollector)scApi).collect() == null ||
+					((SimpleCollector)scApi).collect().getData() == null) {
 				taskProducedEmptyResult = true;
-				break;
+				continue;
 			}
+			o = ((SimpleCollector)scApi).collect().getData();//((SimpleCollector)scApi).collect();
 			LogicalOperator nextOp = operators.get(i);
 			lSchema = nextOp.downstreamConnections().get(0).getSchema(); // 0 cause there's only 1
+			System.out.println("BOOP-" + ((SimpleCollector)scApi).collect().getValues().length);
+			System.out.println("BOOP2-" + lSchema.fields().length);
 			
 			/*
 			if(! sameSchema) {
@@ -146,10 +149,10 @@ public class ScheduleTask implements SeepTask {
 			data.setData(o);
 		}
 		
-		if (!taskProducedEmptyResult && tasks.size() > 1) {
+		/*if (!taskProducedEmptyResult && tasks.size() > 1) {
 			SeepTask next = tasks.get(tasks.size() -1);
 			next.processData(data, api);
-		}
+		}*/
 		
 //		SeepTask next = taskIterator.next(); // Get first, and possibly only task here
 //		// Check whether there are tasks ahead
