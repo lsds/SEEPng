@@ -120,10 +120,12 @@ public class ScheduleTask implements SeepTask {
 		Schema lSchema = null;
 		byte[] o = null;
 		
-		for(int i = 0; i < tasks.size() ; i++) {
+		for(int i = 0; i < tasks.size(); i++) {
 			((SimpleCollector)scApi).reset();
 			SeepTask next = tasks.get(i);
-			next.processData(data, scApi);
+			if (data != null && data.getData() != null) {
+				next.processData(data, scApi);
+			}
 			if(((SimpleCollector)scApi).collect() == null ||
 					((SimpleCollector)scApi).collect().getData() == null) {
 				taskProducedEmptyResult = true;
@@ -132,8 +134,6 @@ public class ScheduleTask implements SeepTask {
 			o = ((SimpleCollector)scApi).collect().getData();//((SimpleCollector)scApi).collect();
 			LogicalOperator nextOp = operators.get(i);
 			lSchema = nextOp.downstreamConnections().get(0).getSchema(); // 0 cause there's only 1
-			System.out.println("BOOP-" + ((SimpleCollector)scApi).collect().getValues().length);
-			System.out.println("BOOP2-" + lSchema.fields().length);
 			
 			/*
 			if(! sameSchema) {

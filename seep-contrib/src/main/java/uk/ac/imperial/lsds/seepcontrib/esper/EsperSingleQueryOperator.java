@@ -186,25 +186,24 @@ public class EsperSingleQueryOperator implements SeepTask {
 	@Override
 	public void processData(ITuple data, API api) {
 		if (data == null || data.getData() == null || api == null) {
-			System.out.println("Bad tuple " + (++bcount));
+			log.debug("Bad {} tuple received", (++bcount));
 			return;
 		}
 		this.api = api;
-//		synchronized (this.initCache) {
-			System.out.println("Good tuple " + (++gcount));
-			//log.debug("Received input tuple {}", data.toString());
-			//log.debug("Map of received input tuple {}", data.getSchema().toString());
-			if (!initialised) {
-				this.initCache.add(data);
-				setUp();
+
+		log.debug("Processing tuple {}", (++gcount));
+		log.debug("Received input tuple {}", data.toString());
+		log.debug("Map of received input tuple {}", data.getSchema().toString());
+		if (!initialised) {
+			this.initCache.add(data);
+			setUp();
+		}
+		else {
+			while (!this.initCache.isEmpty()) {
+				sendData(this.initCache.poll());
 			}
-			else {
-				while (!this.initCache.isEmpty()) {
-					sendData(this.initCache.poll());
-				}
-				sendData(data);
-			}
-//		}
+			sendData(data);
+		}
 	}
 
 	@Override
@@ -224,18 +223,18 @@ public class EsperSingleQueryOperator implements SeepTask {
 		//DataTuple output = new DataTuple(api.getDataMapper(), new TuplePayload());
 		List<Object> objects = new ArrayList<>();
 		
-		System.out.print("outtuple:");
+		//System.out.print("outtuple:");
 		for (String key : out.getEventType().getPropertyNames()) {
 			Object value = out.get(key);
 			if (value == null)
 				continue;
 			objects.add(value);
-			System.out.print(key + ":" + getType(value) + ":" + value + ",");
+			//System.out.print(key + ":" + getType(value) + ":" + value + ",");
 			Schema.SchemaBuilder.getInstance().newField(getType(value), key);
 		} 
+		//System.out.println("  ");
 
 		Schema schema = Schema.SchemaBuilder.getInstance().build();
-		System.out.println("  " + schema.schemaId());
 		OTuple outTuple = new OTuple(schema);
 		outTuple.setValues(objects.toArray());
 		Long otuple_payload_ts = System.currentTimeMillis();
@@ -266,7 +265,7 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 		log.debug("Match cache size: {}", this.matchCache.size());
 
-		System.out.println("Send tuple " + (++scount) + " ");
+		log.debug("Sent tuples: {}", (++scount));
 		api.send(outTuple);
 //		api.send(OTuple.create(schema, out.getEventType().getPropertyNames(), objects.toArray()));;
 	}
