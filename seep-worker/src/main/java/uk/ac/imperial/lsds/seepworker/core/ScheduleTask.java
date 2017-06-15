@@ -120,12 +120,13 @@ public class ScheduleTask implements SeepTask {
 		Schema lSchema = null;
 		byte[] o = null;
 		
-		for(int i = 0; i < tasks.size(); i++) {
+		for(int i = 0; i < tasks.size() - 1; i++) {
 			((SimpleCollector)scApi).reset();
 			SeepTask next = tasks.get(i);
 			if (data != null && data.getData() != null) {
 				next.processData(data, scApi);
 			}
+			data = null;
 			if(((SimpleCollector)scApi).collect() == null ||
 					((SimpleCollector)scApi).collect().getData() == null) {
 				taskProducedEmptyResult = true;
@@ -149,10 +150,10 @@ public class ScheduleTask implements SeepTask {
 			data.setData(o);
 		}
 		
-		/*if (!taskProducedEmptyResult && tasks.size() > 1) {
+		if (data != null && tasks.size() > 0) {
 			SeepTask next = tasks.get(tasks.size() -1);
 			next.processData(data, api);
-		}*/
+		}
 		
 //		SeepTask next = taskIterator.next(); // Get first, and possibly only task here
 //		// Check whether there are tasks ahead

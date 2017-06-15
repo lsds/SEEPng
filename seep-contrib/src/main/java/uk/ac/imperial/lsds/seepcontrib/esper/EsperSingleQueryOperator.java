@@ -195,15 +195,15 @@ public class EsperSingleQueryOperator implements SeepTask {
 		log.debug("Received input tuple {}", data.toString());
 		log.debug("Map of received input tuple {}", data.getSchema().toString());
 		if (!initialised) {
-			this.initCache.add(data);
+			//this.initCache.add(data);
 			setUp();
 		}
-		else {
-			while (!this.initCache.isEmpty()) {
-				sendData(this.initCache.poll());
-			}
+//		else {
+//			while (!this.initCache.isEmpty()) {
+//				sendData(this.initCache.poll());
+//			}
 			sendData(data);
-		}
+//		}
 	}
 
 	@Override
