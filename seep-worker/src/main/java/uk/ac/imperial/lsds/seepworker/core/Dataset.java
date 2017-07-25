@@ -322,7 +322,7 @@ public class Dataset implements IBuffer, OBuffer {
 	public ITuple consumeData_zerocopy(ZCITuple t) {
 		// Try to read from rPtrToBuffer
 		if (rPtrToBuffer != null) {
-			rPtrToBuffer.position(rPtrToBuffer.position() + lastZeroCopySize);
+			rPtrToBuffer.position(lastZeroCopySize);
 		}
 		if(rPtrToBuffer == null || rPtrToBuffer.remaining() == 0) {
 			// MEMORY
@@ -445,7 +445,7 @@ public class Dataset implements IBuffer, OBuffer {
 		}
 		if (rPtrToBuffer.hasRemaining()) {
 			int size = rPtrToBuffer.getInt();
-			lastZeroCopySize = size;
+			lastZeroCopySize = rPtrToBuffer.position() + size;
 			int currentPosition = rPtrToBuffer.position();
 			t.setBufferPtr(currentPosition);
 		}
