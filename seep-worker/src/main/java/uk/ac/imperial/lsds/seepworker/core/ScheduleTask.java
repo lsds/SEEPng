@@ -150,7 +150,7 @@ public class ScheduleTask implements SeepTask {
 			data.setData(o);
 		}
 		
-		if (data != null && tasks.size() > 0) {
+		if (data != null && data.getData() != null && tasks.size() > 0) {
 			SeepTask next = tasks.get(tasks.size() -1);
 			next.processData(data, api);
 		}
