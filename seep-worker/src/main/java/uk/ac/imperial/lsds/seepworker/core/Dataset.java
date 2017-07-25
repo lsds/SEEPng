@@ -33,6 +33,7 @@ public class Dataset implements IBuffer, OBuffer {
 	private DataReferenceManager drm;
 	private DataReference dataReference;
 	private BufferPool bufferPool;
+	private int lastZeroCopySize = 0;
 	
 	private Queue<ByteBuffer> buffers;
 	private Iterator<ByteBuffer> readerIterator;
@@ -320,6 +321,9 @@ public class Dataset implements IBuffer, OBuffer {
 	
 	public ITuple consumeData_zerocopy(ZCITuple t) {
 		// Try to read from rPtrToBuffer
+		if (rPtrToBuffer != null) {
+			rPtrToBuffer.position(rPtrToBuffer.position() + lastZeroCopySize);
+		}
 		if(rPtrToBuffer == null || rPtrToBuffer.remaining() == 0) {
 			// MEMORY
 			if (cacheFileName.equals("")) {
@@ -441,6 +445,7 @@ public class Dataset implements IBuffer, OBuffer {
 		}
 		if (rPtrToBuffer.hasRemaining()) {
 			int size = rPtrToBuffer.getInt();
+			lastZeroCopySize = size;
 			int currentPosition = rPtrToBuffer.position();
 			t.setBufferPtr(currentPosition);
 		}
@@ -623,7 +628,7 @@ public class Dataset implements IBuffer, OBuffer {
 				this.wPtrToBuffer = this.obtainNewWPtrBuffer(); // try to get a new one
 			}
 		}
-		
+
 		// Write size and data to cache buffer. Here it is guaranteed to exist
 		wPtrToBuffer.putInt(dataSize);
 		wPtrToBuffer.put(data);
@@ -633,9 +638,10 @@ public class Dataset implements IBuffer, OBuffer {
 	
 	@Override
 	public boolean write(OTuple o, RuntimeEventRegister reg) {
-		int dataSize = o.getTupleSize();
+		int dataSize = o.getData().length;
 		totalDataWrittenToThisDataset = totalDataWrittenToThisDataset + dataSize + TupleInfo.TUPLE_SIZE_OVERHEAD;
 		this.lastAccessForWriteTime = System.nanoTime();
+		
 		
 		// Try to write to cache buffer first
 		if(wPtrToBuffer.remaining() < dataSize + TupleInfo.TUPLE_SIZE_OVERHEAD) {
@@ -652,6 +658,7 @@ public class Dataset implements IBuffer, OBuffer {
 		
 		// Write size and data to cache buffer. Here it is guaranteed to exist
 		o.writeValues(wPtrToBuffer);
+		System.out.println("Writingx:" + dataSize + "," + totalDataWrittenToThisDataset + "," + wPtrToBuffer.position());
 		
 		return true;
 	}
