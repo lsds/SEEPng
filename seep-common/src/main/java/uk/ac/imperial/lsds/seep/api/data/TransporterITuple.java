@@ -20,6 +20,9 @@ public class TransporterITuple extends ITuple {
 	
 	public void setValues(Object[] values) {
 		this.values = values;
+		if (this.schema.isVariableSize()) {
+			populateOffsets();
+		}
 	}
 	
 	public int getInt(String fieldName) {

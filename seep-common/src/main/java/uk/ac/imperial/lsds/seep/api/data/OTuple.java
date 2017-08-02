@@ -84,7 +84,6 @@ public class OTuple {
 	public void writeValues(ByteBuffer bb) {
 		Type[] types = schema.fields();
 		if (schema.isVariableSize()){
-			System.out.println("WB:"+getData().length);
 			bb.putInt(getData().length);
 		} else {
 			bb.putInt(this.fixedSchemaSize);

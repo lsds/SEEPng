@@ -281,8 +281,11 @@ public class ITuple {
 	private void populateOffsets(){
 		Type[] fields = schema.fields();
 		String[] names = schema.names();
+		ByteBuffer temp = null;
 		int offset = 0;
-		ByteBuffer temp = ByteBuffer.wrap(data);
+		if (data != null) {
+			temp = ByteBuffer.wrap(data);
+		}
 		for(int i = 0; i < fields.length; i++){
 			Type t = fields[i];
 			mapFieldToOffset.put(names[i], offset);
@@ -294,6 +297,9 @@ public class ITuple {
 			}
 			else {
 				// if variable we need to read the size from the current offset
+				if (temp == null) {
+					return;
+				}
 				temp.position(offset);
 				int size = temp.getInt();
 				offset = offset + size + Type.SIZE_OVERHEAD;
