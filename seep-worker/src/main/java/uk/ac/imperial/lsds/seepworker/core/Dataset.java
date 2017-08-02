@@ -294,6 +294,8 @@ public class Dataset implements IBuffer, OBuffer {
 				e.printStackTrace();
 			}
 		}
+		
+		bb.clear();
 		return bb;
 	}
 	
@@ -340,9 +342,9 @@ public class Dataset implements IBuffer, OBuffer {
 				else {
 					// No more buffers available, read the write buffer
 					if(wPtrToBuffer != null) {
-						if(wPtrToBuffer.position() != 0) {
+						//if(wPtrToBuffer.position() != 0) {
 							wPtrToBuffer.flip();
-						}
+						//}
 						rPtrToBuffer = wPtrToBuffer;
 						if(rPtrToBuffer.limit() == 0) {
 							System.out.println("B");
@@ -470,9 +472,9 @@ public class Dataset implements IBuffer, OBuffer {
 				else {
 					// No more buffers available, read the write buffer
 					if(wPtrToBuffer != null) {
-						if(wPtrToBuffer.position() != 0) {
+						//if(wPtrToBuffer.position() != 0) {
 							wPtrToBuffer.flip();
-						}
+						//}
 						rPtrToBuffer = wPtrToBuffer;
 						if(rPtrToBuffer.limit() == 0) {
 							System.out.println("B");
@@ -576,6 +578,9 @@ public class Dataset implements IBuffer, OBuffer {
 			}
 		}
 		
+		if (rPtrToBuffer.remaining() == 0) {
+			return null;
+		}
 		// At this point we have rPtrToBuffer
 		int size = rPtrToBuffer.getInt();
 		if(size == 0) {
@@ -658,7 +663,6 @@ public class Dataset implements IBuffer, OBuffer {
 		
 		// Write size and data to cache buffer. Here it is guaranteed to exist
 		o.writeValues(wPtrToBuffer);
-		System.out.println("Writingx:" + dataSize + "," + totalDataWrittenToThisDataset + "," + wPtrToBuffer.position());
 		
 		return true;
 	}
