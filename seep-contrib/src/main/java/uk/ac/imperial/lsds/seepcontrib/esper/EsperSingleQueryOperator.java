@@ -185,15 +185,15 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	@Override
 	public void processData(ITuple data, API api) {
-		if (data == null || data.getData() == null || api == null) {
-			log.debug("Bad {} tuple received", (++bcount));
+		if (data == null || api == null) {
+			log.debug("{} Bad tuple {} received", esperEngineURL, (++bcount));
 			return;
 		}
 		this.api = api;
 
-		log.debug("Processing tuple {}", (++gcount));
-		log.debug("Received input tuple {}", data.toString());
-		log.debug("Map of received input tuple {}", data.getSchema().toString());
+		log.debug("{} Processing tuple {}", esperEngineURL, (++gcount));
+		//log.debug("{} Received input tuple {}", esperEngineURL, data.toString());
+		//log.debug("Map of received input tuple {}", data.getSchema().toString());
 		if (!initialised) {
 			//this.initCache.add(data);
 			setUp();
@@ -219,6 +219,7 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	protected void sendOutput(EventBean out) {
 		log.debug("Query returned a new result event: {}", out);
+		boolean foundnull = false;
 
 		//DataTuple output = new DataTuple(api.getDataMapper(), new TuplePayload());
 		List<Object> objects = new ArrayList<>();
@@ -226,8 +227,10 @@ public class EsperSingleQueryOperator implements SeepTask {
 		//System.out.print("outtuple:");
 		for (String key : out.getEventType().getPropertyNames()) {
 			Object value = out.get(key);
-			if (value == null)
+			if (value == null) {
+				foundnull = true;
 				continue;
+			}
 			objects.add(value);
 			//System.out.print(key + ":" + getType(value) + ":" + value + ",");
 			Schema.SchemaBuilder.getInstance().newField(getType(value), key);
@@ -239,7 +242,7 @@ public class EsperSingleQueryOperator implements SeepTask {
 		outTuple.setValues(objects.toArray());
 		Long otuple_payload_ts = System.currentTimeMillis();
 
-		log.debug("At {}, sending output {}", otuple_payload_ts, schema.names());
+		log.debug("{}: At {}, sending output {}, {}", esperEngineURL, otuple_payload_ts, schema.names(), outTuple.getData().length);
 
 		if (this.enableLoggingOfMatches) {
 			long cutOffTime = System.currentTimeMillis() - 1000*60*20;
@@ -266,24 +269,24 @@ public class EsperSingleQueryOperator implements SeepTask {
 		log.debug("Match cache size: {}", this.matchCache.size());
 
 		log.debug("Sent tuples: {}", (++scount));
-		api.send(outTuple);
+		//if (!foundnull) {
+			api.send(outTuple);
+		//}
 //		api.send(OTuple.create(schema, out.getEventType().getPropertyNames(), objects.toArray()));;
 	}
 
 	public void sendData(ITuple input) {
 		String stream = input.getString(STREAM_IDENTIFIER);
-		/*if (stream.equals("string")) {
-			stream = "input";
-		}*/
 
 		Map<String, Object> item = new LinkedHashMap<String, Object>();
 
 		// only previously defined types are available to esper.
 		//if (this.typesPerStream.containsKey(stream)) {
-			for (String key : this.typesPerStream.get(stream).keySet())
+			for (String key : this.typesPerStream.get(stream).keySet()) {
 				item.put(key, input.get(key));
+			}
 			
-			log.debug("Sending item {} with name '{}' to esper engine", item,
+			log.debug("{} sending item {} with name '{}' to esper engine", esperEngineURL, item,
 					stream);
 
 			epService.getEPRuntime().sendEvent(item, stream);
