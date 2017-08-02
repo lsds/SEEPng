@@ -202,4 +202,8 @@ public class Stage {
 		return sb.toString();
 	}
 	
+	public void setOutputDataReferences (Map<Integer, Set<DataReference>> newOutputDataReferences) {
+		outputDataReferences = newOutputDataReferences;
+	}
+	
 }

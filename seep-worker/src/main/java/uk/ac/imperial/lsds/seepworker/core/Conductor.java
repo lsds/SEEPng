@@ -159,7 +159,7 @@ public class Conductor {
 		Set<Stage> stages = sd.getStages();
 		LOG.info("Physical plan with {} stages", stages.size());
 		for(Stage s : stages) {
-			ScheduleTask st = ScheduleTask.buildTaskFor(id, s, sd);
+			ScheduleTask st = ScheduleTask.buildTaskFor(id, s, sd, wc);
 			st.setUp();
 			scheduleTasks.put(s, st);
 		}
@@ -182,14 +182,20 @@ public class Conductor {
 		}
 		
 		coreInput = CoreInputFactory.buildCoreInputFor(wc, drm, input, connTypeInformation);
-		if(output.size() == 0) { // FIXME:
-			// FIXME: output should arrive from scheduler, that knows about downstream.
-			// if 0 then it means we do not have output
-			// FIXME: at the very least is should come with the indexed downstream ids
-			// then DataReference can be created here if any difficulty of doing so at master
-			Schema expectedSchema = input.entrySet().iterator().next().getValue().iterator().next().getDataStore().getSchema();
-			// FIXME: assumption, same schema as input -> will change once SINKs have also schemas
-			output = createOutputForTask(s, expectedSchema);
+		if(output.size() == 0) { 
+			if(s.getOutputDataReferences().size() > 0) {
+				output = s.getOutputDataReferences();
+			} else {
+				// FIXME:
+				LOG.info("Stage:Task {}:{} has no output defined. Creating dummy output.", s.getStageId(), task.getEuId());
+				// FIXME: output should arrive from scheduler, that knows about downstream.
+				// if 0 then it means we do not have output
+				// FIXME: at the very least is should come with the indexed downstream ids
+				// then DataReference can be created here if any difficulty of doing so at master
+				Schema expectedSchema = input.entrySet().iterator().next().getValue().iterator().next().getDataStore().getSchema();
+				// FIXME: assumption, same schema as input -> will change once SINKs have also schemas
+				output = createOutputForTask(s, expectedSchema);
+			}
 		}
 		coreOutput = CoreOutputFactory.buildCoreOutputFor(wc, drm, output);
 		

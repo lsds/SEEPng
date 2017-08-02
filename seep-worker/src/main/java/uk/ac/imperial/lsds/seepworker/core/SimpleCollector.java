@@ -93,6 +93,9 @@ public class SimpleCollector implements API {
 	}
 	
 	public byte[] collectMem() {
+		if (mem == null && o != null) {
+			return o.getData();
+		}
 		return mem;
 	}
 	
