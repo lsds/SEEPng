@@ -78,7 +78,7 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 		this.lifeManager = lifeManager;
 		this.k = KryoFactory.buildKryoForProtocolCommands(this.getClass().getClassLoader());
 		this.queryType = queryType;
-		this.enableRestAPI = false;
+		this.enableRestAPI = true;
 		this.opToNodeInformationMapping = null;
 	}
 	
@@ -212,9 +212,6 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 
 	@Override
 	public Map<String, Object> extractQueryOperatorsInformation() {
-		Map<String, Object> nDetails = new HashMap<>();
-
-
 		Map<String, Object> qpInformation = new HashMap<String, Object>();
 
 		List<Object> nodes = new ArrayList<Object>();
@@ -237,7 +234,7 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 		qpInformation.put("nodes", nodes);
 		qpInformation.put("edges", edges);
 
-		return nDetails;
+		return qpInformation;
 	}
 
 	private Map<String, Object> process_node_lo_information(LogicalOperator lo, String type) {
@@ -245,7 +242,14 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 
 		nDetails.put("id", "" + lo.getOperatorId());
 		nDetails.put("type", "graph_type_query");
+		nDetails.put("status", scheduleDescription.getStageWithId(scheduleDescription.getStageOfOperatorId(lo.getOperatorId()).getStageId()).getStatus());
 
+		Iterator <ExecutionUnit> iter = inf.executionUnitsInUse().iterator();
+		if (iter.hasNext()) {
+			ExecutionUnit eu = iter.next();
+			nDetails.put("ip", eu.getControlEndPoint().getIp());
+			nDetails.put("port", eu.getControlEndPoint().getPort());
+		}
 		//if (c.getOpContext().getOperatorStaticInformation() != null) {
 		//    nDetails.put("ip", c.getOpContext().getOperatorStaticInformation().getMyNode().getIp());
 		//    nDetails.put("port", c.getOpContext().getOperatorStaticInformation().getMyNode().getPort());
@@ -365,7 +369,7 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 		boolean containsSourceOperator = false;
 		boolean isChooseOperator = false;
 		
-		boolean finishesStage = false;
+		boolean finishesStage = true;
 		do {
 			// get opId of current op
 			int opId = slo.getOperatorId();
@@ -472,6 +476,7 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 
 	public Map<Integer, RestAPINodeManager> createOperatorDescriptionServers () {
 		Map<Integer, RestAPINodeManager> mapping = new HashMap<>();
+		int counter = 0;
 
 		for(LogicalOperator lso : logicalQuery.getAllOperators()){
 			int opId = lso.getOperatorId();
@@ -485,7 +490,8 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 
 				RestAPINodeManager currentNodeDescription = new RestAPINodeManager();
 				currentNodeDescription.addToRegistry("/nodedescription",  new RestAPINodeDescription(endPointInfo));
-				currentNodeDescription.startServer(endPointInfo.getPort() + 1000);
+				currentNodeDescription.startServer(mc.getInt(MasterConfig.CONTROL_PORT) +1000 + (counter++));
+				//currentNodeDescription.startServer(endPointInfo.getPort() + 1000);
 
 				mapping.put(opId, currentNodeDescription);
 			}

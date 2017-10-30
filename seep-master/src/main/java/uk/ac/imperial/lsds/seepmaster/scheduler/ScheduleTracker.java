@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.imperial.lsds.seep.api.DataReference;
 import uk.ac.imperial.lsds.seep.api.RuntimeEvent;
-import uk.ac.imperial.lsds.seep.core.DatasetMetadata;
 import uk.ac.imperial.lsds.seep.core.DatasetMetadataPackage;
 import uk.ac.imperial.lsds.seep.scheduler.ScheduleDescription;
 import uk.ac.imperial.lsds.seep.scheduler.Stage;
@@ -52,8 +51,10 @@ public class ScheduleTracker {
 					System.exit(0);
 				}
 				sink = stage;
-			}
+			}			
+				
 			scheduleStatus.put(stage, StageStatus.WAITING);
+			stage.setWaiting();
 		}
 		this.lastStageRuntimeEvents = new HashMap<>();
 		this.clusterDatasetRegistry = new ClusterDatasetRegistry(mmp);
@@ -89,6 +90,7 @@ public class ScheduleTracker {
 	
 	public boolean setReady(Stage stage) {
 		this.scheduleStatus.put(stage, StageStatus.READY);
+		stage.setReady();
 		return true;
 	}
 	
@@ -108,6 +110,7 @@ public class ScheduleTracker {
 		LOG.info("[FINISH] SCHEDULING Stage {}", stage.getStageId());
 		// Set finish
 		this.scheduleStatus.put(stage, StageStatus.FINISHED);
+		stage.setFinished();
 		if(stage.getStageType().equals(StageType.SINK_STAGE)) {
 			// Finished schedule
 			this.status = ScheduleStatus.FINISHED;
@@ -151,6 +154,7 @@ public class ScheduleTracker {
 				return false;
 			}
 		}
+		stage.setReady();
 		return true;
 	}
 	

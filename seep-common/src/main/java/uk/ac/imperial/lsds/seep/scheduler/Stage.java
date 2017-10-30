@@ -54,6 +54,8 @@ public class Stage {
 	private boolean hasPartitionedState = false;
 	private boolean hasMultipleInput = false;
 	
+	StageStatus status = StageStatus.WAITING;
+	
 	public Stage(int stageId) {
 		this.stageId = stageId;
 		this.upstream = new HashSet<>();
@@ -204,6 +206,26 @@ public class Stage {
 	
 	public void setOutputDataReferences (Map<Integer, Set<DataReference>> newOutputDataReferences) {
 		outputDataReferences = newOutputDataReferences;
+	}
+	
+	public StageStatus getStatus() {
+		return status;
+	}
+	
+	public void setWaiting() {
+		status = StageStatus.WAITING;
+	}
+	
+	public void setReady() {
+		status = StageStatus.READY;
+	}
+	
+	public void setRunning() {
+		status = StageStatus.RUNNING;
+	}
+	
+	public void setFinished() {
+		status = StageStatus.FINISHED;
 	}
 	
 }
