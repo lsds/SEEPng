@@ -179,9 +179,9 @@ public class EsperSingleQueryOperator implements StageSensitiveSeepTask {
 		/*
 		 * Register rest API handler
 		 */
-		RestAPIManager.restAPIRegistry.put(stageId + "/query", new RestAPIEsperGetQueryDesc(this));
-		RestAPIManager.restAPIRegistry.put(stageId + "/matches", new RestAPIEsperGetMatches(this));
-		RestAPIManager.restAPIRegistry.put(stageId + "/query_update", new RestAPIEsperPostQueryUpdate(this));
+		RestAPIManager.restAPIRegistry.put("/" + stageId + "/query", new RestAPIEsperGetQueryDesc(this));
+		RestAPIManager.restAPIRegistry.put("/" + stageId + "/matches", new RestAPIEsperGetMatches(this));
+		RestAPIManager.restAPIRegistry.put("/" + stageId + "/query_update", new RestAPIEsperPostQueryUpdate(this));
 
 	}
 
@@ -358,7 +358,7 @@ public class EsperSingleQueryOperator implements StageSensitiveSeepTask {
 		log.debug("init with new esper query: {}", query);
 		initialised = false;
 		this.esperQuery = query;
-		RestAPIManager.restAPIRegistry.put(stageId + "/query", new RestAPIEsperGetQueryDesc(this));
+		RestAPIManager.restAPIRegistry.put("/" + stageId + "/query", new RestAPIEsperGetQueryDesc(this));
 		initStatement();
 	}
 

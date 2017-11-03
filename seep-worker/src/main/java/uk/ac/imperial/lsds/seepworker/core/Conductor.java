@@ -243,6 +243,7 @@ public class Conductor {
 		ProcessingEngine engine = ProcessingEngineFactory.buildComposedTaskProcessingEngine(wc, 
 				s.getStageId(), task, state, coreInput, 
 				coreOutput, makeConductorCallbackForScheduleStage(stageId, id, output));
+		task.setUp();
 		engine.start();
 	}
 	
