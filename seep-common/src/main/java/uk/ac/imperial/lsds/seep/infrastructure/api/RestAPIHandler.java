@@ -47,15 +47,18 @@ public class RestAPIHandler extends AbstractHandler {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
 
-
-        if (!this.restAPIRegistry.containsKey(target)) {
+        if (!this.restAPIRegistry.containsKey(target) && !RestAPIManager.restAPIRegistry.containsKey(target)) {
             baseRequest.setHandled(true);
             if (callback != null)
-                response.getWriter().println(callback + "(" + mapper.writeValueAsString(this.restAPIRegistry.keySet()) + ")");
+                response.getWriter().println(callback + "(" + mapper.writeValueAsString(this.restAPIRegistry.keySet()) + "," + mapper.writeValueAsString(RestAPIManager.restAPIRegistry.keySet()) + ")");
             else
-                response.getWriter().println(mapper.writeValueAsString(this.restAPIRegistry.keySet()));
+                response.getWriter().println(mapper.writeValueAsString(this.restAPIRegistry.keySet()) + "," + mapper.writeValueAsString(RestAPIManager.restAPIRegistry.keySet()));
         }
         else {
+        	Map<String, RestAPIRegistryEntry> theDecider = this.restAPIRegistry;
+        	if (!this.restAPIRegistry.containsKey(target)) {
+        		theDecider = RestAPIManager.restAPIRegistry;
+        	}
             if (baseRequest.getMethod().equals("GET")) {
                 baseRequest.setHandled(true);
 
@@ -71,9 +74,9 @@ public class RestAPIHandler extends AbstractHandler {
                 }
 
                 if (callback != null)
-                    response.getWriter().println(callback + "(" + mapper.writeValueAsString(this.restAPIRegistry.get(target).getAnswer(reqParametersMultiMap)) + ")");
+                    response.getWriter().println(callback + "(" + mapper.writeValueAsString(theDecider.get(target).getAnswer(reqParametersMultiMap)) + ")");
                 else
-                    response.getWriter().println(mapper.writeValueAsString(this.restAPIRegistry.get(target).getAnswer(reqParametersMultiMap)));
+                    response.getWriter().println(mapper.writeValueAsString(theDecider.get(target).getAnswer(reqParametersMultiMap)));
             }
             else if (baseRequest.getMethod().equals("POST")) {
                 baseRequest.setHandled(true);
@@ -90,9 +93,9 @@ public class RestAPIHandler extends AbstractHandler {
                 }
 
                 if (callback != null)
-                    response.getWriter().println(callback + "(" + mapper.writeValueAsString(this.restAPIRegistry.get(target).getAnswer(reqParametersMultiMap)) + ")");
+                    response.getWriter().println(callback + "(" + mapper.writeValueAsString(theDecider.get(target).getAnswer(reqParametersMultiMap)) + ")");
                 else
-                    response.getWriter().println(mapper.writeValueAsString(this.restAPIRegistry.get(target).getAnswer(reqParametersMultiMap)));
+                    response.getWriter().println(mapper.writeValueAsString(theDecider.get(target).getAnswer(reqParametersMultiMap)));
             }
         }
     }

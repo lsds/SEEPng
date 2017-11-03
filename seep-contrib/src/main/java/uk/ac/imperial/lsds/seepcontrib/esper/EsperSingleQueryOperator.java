@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.imperial.lsds.seep.api.API;
-import uk.ac.imperial.lsds.seep.api.SeepTask;
+import uk.ac.imperial.lsds.seep.api.StageSensitiveSeepTask;
 import uk.ac.imperial.lsds.seep.api.data.ITuple;
 import uk.ac.imperial.lsds.seep.api.data.OTuple;
 import uk.ac.imperial.lsds.seep.api.data.Schema;
@@ -29,7 +29,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 import uk.ac.imperial.lsds.seep.infrastructure.api.RestAPIManager;
 
-public class EsperSingleQueryOperator implements SeepTask {
+public class EsperSingleQueryOperator implements StageSensitiveSeepTask {
 
 	private static final long serialVersionUID = 1L;
 
@@ -75,6 +75,8 @@ public class EsperSingleQueryOperator implements SeepTask {
 	private boolean initialised = false;
 
 	private API api = null;
+	
+	private int stageId;
 
 	public EsperSingleQueryOperator() {		
 	}
@@ -177,9 +179,9 @@ public class EsperSingleQueryOperator implements SeepTask {
 		/*
 		 * Register rest API handler
 		 */
-		RestAPIManager.restAPIRegistry.put("/query", new RestAPIEsperGetQueryDesc(this));
-		RestAPIManager.restAPIRegistry.put("/matches", new RestAPIEsperGetMatches(this));
-		RestAPIManager.restAPIRegistry.put("/query_update", new RestAPIEsperPostQueryUpdate(this));
+		RestAPIManager.restAPIRegistry.put(stageId + "/query", new RestAPIEsperGetQueryDesc(this));
+		RestAPIManager.restAPIRegistry.put(stageId + "/matches", new RestAPIEsperGetMatches(this));
+		RestAPIManager.restAPIRegistry.put(stageId + "/query_update", new RestAPIEsperPostQueryUpdate(this));
 
 	}
 
@@ -356,7 +358,7 @@ public class EsperSingleQueryOperator implements SeepTask {
 		log.debug("init with new esper query: {}", query);
 		initialised = false;
 		this.esperQuery = query;
-		RestAPIManager.restAPIRegistry.put("/query", new RestAPIEsperGetQueryDesc(this));
+		RestAPIManager.restAPIRegistry.put(stageId + "/query", new RestAPIEsperGetQueryDesc(this));
 		initStatement();
 	}
 
@@ -404,6 +406,11 @@ public class EsperSingleQueryOperator implements SeepTask {
 
 	public List<Pair<Long,OTuple>> getMatchCache() {
 		return this.matchCache;
+	}
+	
+	public void setStage(Integer newStageId) {
+		log.debug("Setting stage id {} in esper operator", newStageId);
+		stageId = newStageId;
 	}
 
 }

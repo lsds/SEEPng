@@ -92,6 +92,12 @@ public class WorkerConfig extends Config {
 	public static final String SHUFFLE_NUM_PARTITIONS = "shuffle.partitions.num";
 	private static final String SHUFFLE_NUM_PARTITIONS_DOC = "Configures the default number of partitions per DataReference per partition";
 
+	public static final String REST_API_ENABLED = "enable.restapi";
+	private static final String REST_API_DOC = "Enable the RESTful API (true) to query SEEPng execution evolution through a web interface";
+
+	public static final String REST_API_WORKER_PORT = "restapi.port";
+	private static final String REST_API_WORKER_PORT_DOC = "Port over which the RESTful API services are offered";
+
 	
 	static{
 		long availableMemoryBytes = Runtime.getRuntime().totalMemory();
@@ -104,6 +110,8 @@ public class WorkerConfig extends Config {
 				.define(MASTER_IP, Type.STRING, Importance.HIGH, MASTER_IP_DOC)
 				.define(MASTER_CONNECTION_RETRIES, Type.INT, Integer.MAX_VALUE, Importance.LOW, MASTER_CONNECTION_RETRIES_DOC)
 				.define(MASTER_RETRY_BACKOFF_MS, Type.INT, 3000, Importance.LOW, MASTER_RETRY_BACKOFF_MS_DOC)
+				.define(REST_API_ENABLED, Type.STRING, "false", Importance.LOW, REST_API_DOC)
+				.define(REST_API_WORKER_PORT, Type.INT, 8082, Importance.LOW, REST_API_WORKER_PORT_DOC)
 				.define(ENGINE_TYPE, Type.INT, 0, Importance.MEDIUM, ENGINE_TYPE_DOC)
 				.define(DATA_PORT, Type.INT, 4500, Importance.MEDIUM, DATA_PORT_DOC)
 				.define(NUM_NETWORK_READER_THREADS, Type.INT, 2, Importance.MEDIUM, NUM_NETWORK_READER_THREADS_DOC)

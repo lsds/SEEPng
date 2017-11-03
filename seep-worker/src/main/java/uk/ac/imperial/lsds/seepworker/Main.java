@@ -22,6 +22,8 @@ import uk.ac.imperial.lsds.seep.infrastructure.ControlEndPoint;
 import uk.ac.imperial.lsds.seep.metrics.SeepMetrics;
 import uk.ac.imperial.lsds.seep.util.RuntimeClassLoader;
 import uk.ac.imperial.lsds.seep.util.Utils;
+import uk.ac.imperial.lsds.seepworker.infrastructure.master.api.RestAPIWorker;
+import uk.ac.imperial.lsds.seepworker.infrastructure.master.api.RestAPIQueryManager;
 import uk.ac.imperial.lsds.seepworker.comm.ControlAPIImplementation;
 import uk.ac.imperial.lsds.seepworker.comm.ControlCommManager;
 import uk.ac.imperial.lsds.seepworker.core.Conductor;
@@ -84,6 +86,11 @@ public class Main {
 		
 		// Register JVM shutdown hook
 		registerShutdownHook(Utils.computeIdFromIpAndPort(myIp, controlPort), c, masterConnection, api);
+
+		boolean enableRestAPI = wc.getString(WorkerConfig.REST_API_ENABLED).equals("true");
+		if (enableRestAPI) {
+			RestAPIWorker.RestAPIWorkerManager.getInstance().startServer(wc.getInt(WorkerConfig.REST_API_WORKER_PORT));
+		}
 	}
 	
 	private void configureMetricsReporting(WorkerConfig wc){

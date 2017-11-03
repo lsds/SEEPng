@@ -1,5 +1,7 @@
 package uk.ac.imperial.lsds.seepworker.core;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -18,6 +20,7 @@ import uk.ac.imperial.lsds.seep.api.DataReference;
 import uk.ac.imperial.lsds.seep.api.DataStore;
 import uk.ac.imperial.lsds.seep.api.DataStoreType;
 import uk.ac.imperial.lsds.seep.api.SeepTask;
+import uk.ac.imperial.lsds.seep.api.StageSensitiveSeepTask;
 import uk.ac.imperial.lsds.seep.api.DataReference.ServeMode;
 import uk.ac.imperial.lsds.seep.api.data.ITuple;
 import uk.ac.imperial.lsds.seep.api.data.OTuple;
@@ -56,7 +59,11 @@ public class ScheduleTask implements SeepTask {
 		this.tasks = new ArrayList<>();
 		this.opIt = operators.iterator();
 		while(opIt.hasNext()) {
-			tasks.add(opIt.next().getSeepTask());
+			SeepTask next = opIt.next().getSeepTask();
+			if (next instanceof StageSensitiveSeepTask) {
+				((StageSensitiveSeepTask)next).setStage(stageId);
+			}
+			tasks.add(next);
 		}
 		this.taskIterator = tasks.iterator();
 		// TODO: initialize sameSchema here by actually checking if the schema is the same
@@ -150,6 +157,7 @@ public class ScheduleTask implements SeepTask {
 		for(int i = 0; i < tasks.size() - 1; i++) {
 			((SimpleCollector)scApi).reset();
 			SeepTask next = tasks.get(i);
+			
 			next.processData(data, scApi);
 			o = ((SimpleCollector)scApi).collectMem();
 			
