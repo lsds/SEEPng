@@ -148,6 +148,7 @@ public class SchedulerEngineWorker implements Runnable {
 			trackStageCompletionAsync(nextStage, euInvolved);
 			
 			LOG.info("[START] SCHEDULING Stage {}", nextStage.getStageId());
+			this.tracker.setRunning(nextStage);
 			for(CommandToNode ctn : commands) {
 				boolean success = comm.send_object_sync(ctn.command, ctn.c, k);
 			}

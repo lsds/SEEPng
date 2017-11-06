@@ -94,6 +94,12 @@ public class ScheduleTracker {
 		return true;
 	}
 	
+	public boolean setRunning(Stage stage) {
+		this.scheduleStatus.put(stage, StageStatus.RUNNING);
+		stage.setRunning();
+		return true;
+	}
+	
 	public Set<Stage> getReadySet() {
 		Set<Stage> toReturn = new HashSet<>();
 		for(Stage stage : stages) {
@@ -139,6 +145,10 @@ public class ScheduleTracker {
 	
 	public boolean isStageFinished(Stage stage) {
 		return this.scheduleStatus.get(stage).equals(StageStatus.FINISHED);
+	}
+	
+	public boolean isStageRunning(Stage stage) {
+		return this.scheduleStatus.get(stage).equals(StageStatus.RUNNING);
 	}
 	
 	public boolean resetAllStagesTo(StageStatus newStatus) {
