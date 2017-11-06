@@ -59,11 +59,11 @@ public class ScheduleTask implements SeepTask {
 		this.tasks = new ArrayList<>();
 		this.opIt = operators.iterator();
 		while(opIt.hasNext()) {
-			SeepTask next = opIt.next().getSeepTask();
-			if (next instanceof StageSensitiveSeepTask) {
-				((StageSensitiveSeepTask)next).setStage(stageId);
+			LogicalOperator next = opIt.next();
+			if (next.getSeepTask() instanceof StageSensitiveSeepTask) {
+				((StageSensitiveSeepTask)(next.getSeepTask())).setStage(next.getOperatorId());
 			}
-			tasks.add(next);
+			tasks.add(next.getSeepTask());
 		}
 		this.taskIterator = tasks.iterator();
 		// TODO: initialize sameSchema here by actually checking if the schema is the same

@@ -47,7 +47,7 @@ public class RestAPIQueryManager implements RestAPIRegistryEntry {
         while (iter.hasNext()) {
             DownstreamConnection dc = iter.next();
             Map<String, Object> eDetails = new HashMap<>();
-            eDetails.put("streamid", lo.getOperatorId() + "-" + dc.getStreamId());
+            eDetails.put("streamid", dc.getStreamId() + ":" + lo.getOperatorId() + "-" + dc.getDownstreamOperator().getOperatorId());
             eDetails.put("source", "" + lo.getOperatorId());
             eDetails.put("target", "" + dc.getDownstreamOperator().getOperatorId());
             eDetails.put("type", "graph_edge_defaults");
