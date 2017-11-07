@@ -243,6 +243,14 @@ public class ScheduledQueryManager implements QueryManager, ScheduleManager {
 		nDetails.put("id", "" + lo.getOperatorId());
 		nDetails.put("type", "graph_type_query");
 		nDetails.put("status", scheduleDescription.getStageWithId(scheduleDescription.getStageOfOperatorId(lo.getOperatorId()).getStageId()).getStatus());
+		
+		if (scheduleDescription.getStageOfOperatorId(lo.getOperatorId()).getStartTime() != null) {
+			nDetails.put("start", scheduleDescription.getStageOfOperatorId(lo.getOperatorId()).getStartTime().getTime());
+			
+		}
+		if (scheduleDescription.getStageOfOperatorId(lo.getOperatorId()).getFinishTime() != null) {
+			nDetails.put("finish", scheduleDescription.getStageOfOperatorId(lo.getOperatorId()).getFinishTime().getTime());
+		}
 
 		Iterator <ExecutionUnit> iter = inf.executionUnitsInUse().iterator();
 		if (iter.hasNext()) {

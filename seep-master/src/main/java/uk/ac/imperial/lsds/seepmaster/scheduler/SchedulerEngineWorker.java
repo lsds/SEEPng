@@ -1,6 +1,7 @@
 package uk.ac.imperial.lsds.seepmaster.scheduler;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +20,13 @@ import uk.ac.imperial.lsds.seep.comm.Connection;
 import uk.ac.imperial.lsds.seep.comm.protocol.Command;
 import uk.ac.imperial.lsds.seep.comm.protocol.StageStatusCommand;
 import uk.ac.imperial.lsds.seep.core.DatasetMetadataPackage;
+import uk.ac.imperial.lsds.seep.infrastructure.api.RestAPILog;
 import uk.ac.imperial.lsds.seep.scheduler.ScheduleDescription;
 import uk.ac.imperial.lsds.seep.scheduler.Stage;
 import uk.ac.imperial.lsds.seep.scheduler.StageStatus;
 import uk.ac.imperial.lsds.seep.scheduler.StageType;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.InfrastructureManager;
+import uk.ac.imperial.lsds.seepmaster.infrastructure.master.api.RestAPIMaster;
 import uk.ac.imperial.lsds.seepmaster.scheduler.loadbalancing.LoadBalancingStrategy;
 import uk.ac.imperial.lsds.seepmaster.scheduler.memorymanagement.MDFMemoryManagementPolicy;
 import uk.ac.imperial.lsds.seepmaster.scheduler.memorymanagement.MemoryManagementPolicy;
@@ -148,6 +151,16 @@ public class SchedulerEngineWorker implements Runnable {
 			trackStageCompletionAsync(nextStage, euInvolved);
 			
 			LOG.info("[START] SCHEDULING Stage {}", nextStage.getStageId());
+			String operatorNames = "";
+			for (Integer opId : nextStage.getWrappedOperators()) {
+				if (operatorNames.length() > 0) {
+					operatorNames += ", ";
+				}
+				operatorNames += this.scheduleDescription.getOperatorWithId(opId).getOperatorName();
+			}
+			
+			((RestAPILog)RestAPIMaster.RestAPIMasterManager.getInstance().getEntry("/log")).addEntry((new Date()).toString() + 
+					" Starting stage " + nextStage.getStageId() + " (includes " + operatorNames + ").");
 			this.tracker.setRunning(nextStage);
 			for(CommandToNode ctn : commands) {
 				boolean success = comm.send_object_sync(ctn.command, ctn.c, k);
@@ -165,6 +178,9 @@ public class SchedulerEngineWorker implements Runnable {
 			long stageFinish = System.nanoTime();
 			long totalStageTime = stageFinish - stageStart;
 			LOG.warn("Stage {} finished in: ! {}", nextStage.getStageId(), totalStageTime);
+			
+			((RestAPILog)RestAPIMaster.RestAPIMasterManager.getInstance().getEntry("/log")).addEntry((new Date()).toString() + 
+					" Finished stage " + nextStage.getStageId() + " (includes " + operatorNames + ").");
 			
 			if(! commands.isEmpty()) {
 				// TODO:

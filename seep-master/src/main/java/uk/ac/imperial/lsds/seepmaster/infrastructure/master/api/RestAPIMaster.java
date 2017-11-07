@@ -36,6 +36,10 @@ public class RestAPIMaster {
             }
             return instance;
         }
+        
+        public RestAPIRegistryEntry getEntry(String target) {
+        	return this.restAPIRegistry.get(target);
+        }
 
         public RestAPIMasterManager addToRegistry (String location, RestAPIRegistryEntry information) {
             restAPIRegistry.put(location, information);

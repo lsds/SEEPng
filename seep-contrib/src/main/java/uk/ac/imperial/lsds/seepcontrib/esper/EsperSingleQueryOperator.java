@@ -396,6 +396,10 @@ public class EsperSingleQueryOperator implements StageSensitiveSeepTask {
 	public String getName() {
 		return name;
 	}
+	
+	public Integer getId() {
+		return stageId;
+	}
 
 	public boolean isEnableLoggingOfMatches() {
 		return enableLoggingOfMatches;

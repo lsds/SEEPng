@@ -16,6 +16,7 @@ import uk.ac.imperial.lsds.seep.comm.serialization.JavaSerializer;
 import uk.ac.imperial.lsds.seep.config.CommandLineArgs;
 import uk.ac.imperial.lsds.seep.config.ConfigKey;
 import uk.ac.imperial.lsds.seep.infrastructure.ControlEndPoint;
+import uk.ac.imperial.lsds.seep.infrastructure.api.RestAPILog;
 import uk.ac.imperial.lsds.seepmaster.infrastructure.master.api.RestAPIQueryManager;
 import uk.ac.imperial.lsds.seep.util.Utils;
 import uk.ac.imperial.lsds.seepmaster.comm.MasterWorkerAPIImplementation;
@@ -75,6 +76,7 @@ public class Main {
 
 		if (enableRestAPI) {
 			RestAPIMaster.RestAPIMasterManager.getInstance().addToRegistry("/queryplan", new RestAPIQueryManager(qm));
+			RestAPIMaster.RestAPIMasterManager.getInstance().addToRegistry("/log", new RestAPILog());
 			RestAPIMaster.RestAPIMasterManager.getInstance().startServer(mc.getInt(MasterConfig.REST_API_MASTER_PORT));
 		}
 		

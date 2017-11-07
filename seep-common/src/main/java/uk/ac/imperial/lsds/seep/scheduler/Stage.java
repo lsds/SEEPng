@@ -1,6 +1,7 @@
 package uk.ac.imperial.lsds.seep.scheduler;
 
 import java.util.ArrayDeque;
+import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,6 +48,9 @@ public class Stage {
 	 * The logical operators that are part of this stage.
 	 */
 	private Deque<Integer> wrapping;
+	
+	private Date beginTime = null;
+	private Date endTime = null;
 	
 	/**
 	 * Whether this stage will create a partitioned output or not
@@ -222,10 +226,20 @@ public class Stage {
 	
 	public void setRunning() {
 		status = StageStatus.RUNNING;
+		beginTime = new Date();
 	}
 	
 	public void setFinished() {
 		status = StageStatus.FINISHED;
+		endTime = new Date();
+	}
+	
+	public Date getStartTime() {
+		return beginTime;
+	}
+	
+	public Date getFinishTime() {
+		return endTime;
 	}
 	
 }
