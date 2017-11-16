@@ -56,7 +56,7 @@ public class WebUI implements UI{
         // Configure connector
         ServerConnector http = new ServerConnector(server);
         http.setHost("localhost");
-        http.setPort(8080);
+        http.setPort(8085);
         http.setIdleTimeout(30000);
         server.addConnector(http);
 	}
