@@ -65,7 +65,7 @@ public class MasterConfig extends Config {
 				.define(CONTROL_PORT, Type.INT, 3500, Importance.HIGH, CONTROL_PORT_DOC)
 				.define(UI_TYPE, Type.INT, 0, Importance.HIGH, UI_TYPE_DOC)
 				.define(REST_API_ENABLED, Type.STRING, "false", Importance.LOW, REST_API_DOC)
-				.define(REST_API_MASTER_PORT, Type.INT, 8081, Importance.LOW, REST_API_MASTER_PORT_DOC)
+				.define(REST_API_MASTER_PORT, Type.INT, 8080, Importance.LOW, REST_API_MASTER_PORT_DOC)
 				.define(SCHED_STRATEGY, Type.INT, 0, Importance.LOW, SCHED_STRATEGY_DOC)
 				.define(MEM_MANAGEMENT_POLICY, Type.INT, 0, Importance.LOW, MEM_MANAGEMENT_POLICY_DOC)
 				.define(PROPERTIES_FILE, Type.STRING, Importance.LOW, PROPERTIES_FILE_DOC)

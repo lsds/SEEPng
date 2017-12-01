@@ -185,6 +185,9 @@ public class WebUIHandler extends HttpServlet {
 		case 4:
 			LOG.info("Exit");
 			return true;
+		case 100:
+			System.exit(0);
+			return true;
 		default:
 				
 		}

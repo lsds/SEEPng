@@ -111,7 +111,7 @@ public class WorkerConfig extends Config {
 				.define(MASTER_CONNECTION_RETRIES, Type.INT, Integer.MAX_VALUE, Importance.LOW, MASTER_CONNECTION_RETRIES_DOC)
 				.define(MASTER_RETRY_BACKOFF_MS, Type.INT, 3000, Importance.LOW, MASTER_RETRY_BACKOFF_MS_DOC)
 				.define(REST_API_ENABLED, Type.STRING, "false", Importance.LOW, REST_API_DOC)
-				.define(REST_API_WORKER_PORT, Type.INT, 8082, Importance.LOW, REST_API_WORKER_PORT_DOC)
+				.define(REST_API_WORKER_PORT, Type.INT, 8080, Importance.LOW, REST_API_WORKER_PORT_DOC)
 				.define(ENGINE_TYPE, Type.INT, 0, Importance.MEDIUM, ENGINE_TYPE_DOC)
 				.define(DATA_PORT, Type.INT, 4500, Importance.MEDIUM, DATA_PORT_DOC)
 				.define(NUM_NETWORK_READER_THREADS, Type.INT, 2, Importance.MEDIUM, NUM_NETWORK_READER_THREADS_DOC)

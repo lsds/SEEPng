@@ -28,7 +28,7 @@ public class WebUI implements UI{
 	public WebUI(GenericQueryManager qm, InfrastructureManager inf){
 		actionHandler = new WebUIHandler(qm, inf);
 		silenceJettyLogger();
-		this.server = new Server(8888);
+		this.server = new Server(8081);
 		
 		// Configure resourceHandler
 		ResourceHandler mainHandler = new ResourceHandler();
@@ -55,8 +55,8 @@ public class WebUI implements UI{
         
         // Configure connector
         ServerConnector http = new ServerConnector(server);
-        http.setHost("localhost");
-        http.setPort(8085);
+        http.setHost("146.179.131.146");
+        http.setPort(8888);
         http.setIdleTimeout(30000);
         server.addConnector(http);
 	}
